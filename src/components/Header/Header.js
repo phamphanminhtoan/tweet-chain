@@ -71,7 +71,7 @@ const Header = props => {
                   aria-haspopup="true"
                   aria-expanded="false"
                 >
-                  Phạm Phan Minh Toàn{" "}
+                  {props.user ? props.user.username : "Đăng nhập"}
                   <span>
                     <img src="images/down-arrow.png" alt="" />
                   </span>

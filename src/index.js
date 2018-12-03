@@ -10,14 +10,13 @@ import { createStore, applyMiddleware } from "redux";
 import App from "./containers/App";
 import reducers from "./reducers";
 import createSagaMiddleware from "redux-saga";
+import thunk from 'redux-thunk' //import thunk
 
-import Saga from "./sagas";
 
 const sagaMiddleware = createSagaMiddleware();
 const history = createHistory();
 
-const store = createStore(reducers, applyMiddleware(sagaMiddleware));
-sagaMiddleware.run(Saga);
+const store = createStore(reducers, applyMiddleware(thunk));
 
 class Application extends React.Component {
   render() {
