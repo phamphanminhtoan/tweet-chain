@@ -20,7 +20,7 @@ const Header = props => {
               <span className="icon-bar" />
               <span className="icon-bar" />
             </button>
-            <a className="navbar-brand" href="index-register.html">
+            <a className="navbar-brand" href="/">
               <img src="images/tc.png" alt="logo" />
             </a>
           </div>
@@ -63,48 +63,39 @@ const Header = props => {
                 </ul>
               </li>
               <li className="dropdown">
-                <a
-                  href="/"
-                  className="dropdown-toggle"
-                  data-toggle="dropdown"
-                  role="button"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  {props.user ? props.user.username : "Đăng nhập"}
-                  <span>
-                    <img src="images/down-arrow.png" alt="" />
-                  </span>
-                </a>
-                <ul className="dropdown-menu login">
-                  <li>
-                    <a href="timeline.html">Timeline</a>
-                  </li>
-                  <li>
-                    <a href="timeline-about.html">Timeline About</a>
-                  </li>
-                  <li>
-                    <a href="timeline-album.html">Timeline Album</a>
-                  </li>
-                  <li>
-                    <a href="timeline-friends.html">Timeline Friends</a>
-                  </li>
-                  <li>
-                    <a href="edit-profile-basic.html">Edit: Basic Info</a>
-                  </li>
-                  <li>
-                    <a href="edit-profile-work-edu.html">Edit: Work</a>
-                  </li>
-                  <li>
-                    <a href="edit-profile-interests.html">Edit: Interests</a>
-                  </li>
-                  <li>
-                    <a href="edit-profile-settings.html">Account Settings</a>
-                  </li>
-                  <li>
-                    <a href="edit-profile-password.html">Change Password</a>
-                  </li>
-                </ul>
+                {props.user ? (
+                  <a
+                    href="/"
+                    className="dropdown-toggle"
+                    data-toggle="dropdown"
+                    role="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    {props.user.username}
+                    <span>
+                      <img src="images/down-arrow.png" alt="" />
+                    </span>
+                  </a>
+                ) : (
+                  <a href="/login">Đăng nhập</a>
+                )}
+
+                {props.user ? (
+                  <ul className="dropdown-menu login">
+                    <li>
+                      <a href="#">Profile</a>
+                    </li>
+                    <li>
+                      <a href="#">Edit Profile</a>
+                    </li>
+                    <li>
+                      <a href="#">Log out</a>
+                    </li>
+                  </ul>
+                ) : (
+                  <div />
+                )}
               </li>
               <li className="dropdown">
                 <a href="contact.html">
