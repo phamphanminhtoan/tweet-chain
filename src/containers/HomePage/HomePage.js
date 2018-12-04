@@ -1,144 +1,25 @@
 import React from "react";
+import TimelineCover from "../../components/TimelineCover";
+import PostBox from "../../components/PostBox";
 import "./style.css";
+
+const tempData = {
+  fullName: 'Ngô Hải Yến',
+  address: 'Hanoi City',
+  followingPeople: '1,120',
+  avatarUrl: 'images/users/avatar.jpg',
+  coverUrl: '../images/covers/cover.jpg'
+}
 
 const HomePage = props => {
   return (
     <div className="timeline">
-      <div className="timeline-cover">
-        {/*Timeline Menu for Large Screens*/}
-        <div className="timeline-nav-bar hidden-sm hidden-xs">
-          <div className="row">
-            <div className="col-md-3">
-              <div className="profile-info">
-                <img
-                  src="images/users/avatar.jpg"
-                  alt=""
-                  className="img-responsive profile-photo"
-                />
-                <h3>Ngô Hải Yến</h3>
-                <p className="text-muted">FourLeaf</p>
-              </div>
-            </div>
-            <div className="col-md-9">
-              <ul className="list-inline profile-menu">
-                <li>
-                  <a to="/" className="active">
-                    Timeline
-                  </a>
-                </li>
-                <li>
-                  <a to="/about">About</a>
-                </li>
-                <li>
-                  <a href="timeline-album.html">Album</a>
-                </li>
-                <li>
-                  <a href="timeline-friends.html">Friends</a>
-                </li>
-              </ul>
-              <ul className="follow-me list-inline">
-                <li>1,299 people following her</li>
-                <li>
-                  <button className="btn-primary">Add Friend</button>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        {/*Timeline Menu for Large Screens End*/}
-        {/*Timeline Menu for Small Screens*/}
-        <div className="navbar-mobile hidden-lg hidden-md">
-          <div className="profile-info">
-            <img
-              src="images/users/avatar.jpg"
-              alt=""
-              className="img-responsive profile-photo"
-            />
-            <h4>Ngô Hải Yến</h4>
-            <p className="text-muted">FourLeaf</p>
-          </div>
-          <div className="mobile-menu">
-            <ul className="list-inline">
-              <li>
-                <a href="timline.html" className="active">
-                  Timeline
-                </a>
-              </li>
-              <li>
-                <a href="timeline-about.html">About</a>
-              </li>
-              <li>
-                <a href="timeline-album.html">Album</a>
-              </li>
-              <li>
-                <a href="timeline-friends.html">Friends</a>
-              </li>
-            </ul>
-            <button className="btn-primary">Add Friend</button>
-          </div>
-        </div>
-        {/*Timeline Menu for Small Screens End*/}
-      </div>
+      <TimelineCover user={tempData} />
       <div id="page-contents">
         <div className="row">
           <div className="col-md-3" />
           <div className="col-md-7">
-            {/* Post Create Box
-================================================= */}
-            <div className="create-post">
-              <div className="row">
-                <div className="col-md-7 col-sm-7">
-                  <div className="form-group">
-                    <img
-                      src="images/users/avatar.jpg"
-                      alt=""
-                      className="profile-photo-md"
-                    />
-                    <textarea
-                      name="texts"
-                      id="exampleTextarea"
-                      cols={30}
-                      rows={1}
-                      className="form-control"
-                      placeholder="Write what you wish"
-                      defaultValue={""}
-                    />
-                  </div>
-                </div>
-                <div className="col-md-5 col-sm-5">
-                  <div className="tools">
-                    <ul className="publishing-tools list-inline">
-                      <li>
-                        <a href="/">
-                          <i className="ion-compose" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/">
-                          <i className="ion-images" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/">
-                          <i className="ion-ios-videocam" />
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/">
-                          <i className="ion-map" />
-                        </a>
-                      </li>
-                    </ul>
-                    <button className="btn btn-primary pull-right">
-                      Publish
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Post Create Box End*/}
-            {/* Post Content
-================================================= */}
+            <PostBox user={tempData} />
             <div className="post-content">
               {/*Post Date*/}
               <div className="post-date hidden-xs hidden-sm">

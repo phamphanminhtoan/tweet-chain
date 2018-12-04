@@ -2,21 +2,19 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 import { authUserFromServer } from "../../containers/App/action";
-const axios = require("axios");
 
-const PrivateRoute = ({ component: Component, props, ...rest }) => {
-  props.authUserFromServer();
+const PrivateRoute = ({ component: Component, ...rest }) => {
   return (
     <Route
       {...rest}
-      render={props =>
-        props.isAuthenticated ? (
-          <Component {...props} />
+      render={propser =>
+        rest.isAuthenticated ? (
+          <Component {...propser} />
         ) : (
           <Redirect
             to={{
               pathname: "/login",
-              state: { from: props.location }
+              state: { from: propser.location }
             }}
           />
         )
