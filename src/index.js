@@ -4,16 +4,13 @@ import * as serviceWorker from "./serviceWorker";
 
 import createHistory from "history/createBrowserHistory";
 import { Provider } from "react-redux";
-import { ConnectedRouter } from "react-router-redux";
 import { Router } from "react-router-dom";
 import { createStore, applyMiddleware } from "redux";
 import App from "./containers/App";
 import reducers from "./reducers";
-import createSagaMiddleware from "redux-saga";
 import thunk from 'redux-thunk' //import thunk
 
 
-const sagaMiddleware = createSagaMiddleware();
 const history = createHistory();
 
 const store = createStore(reducers, applyMiddleware(thunk));

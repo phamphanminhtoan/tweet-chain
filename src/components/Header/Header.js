@@ -32,35 +32,12 @@ const Header = props => {
             <ul className="nav navbar-nav navbar-right main-menu">
               <li className="dropdown">
                 <a
-                  href="/"
+                  href="/register"
                   className="dropdown-toggle"
-                  data-toggle="dropdown"
-                  role="button"
-                  aria-haspopup="true"
-                  aria-expanded="false"
                 >
-                  Newsfeed{" "}
+                  Register
                 </a>
-                <ul className="dropdown-menu newsfeed-home">
-                  <li>
-                    <a href="newsfeed.html">Newsfeed</a>
-                  </li>
-                  <li>
-                    <a href="newsfeed-people-nearby.html">Poeple Nearly</a>
-                  </li>
-                  <li>
-                    <a href="newsfeed-friends.html">My friends</a>
-                  </li>
-                  <li>
-                    <a href="newsfeed-messages.html">Chatroom</a>
-                  </li>
-                  <li>
-                    <a href="newsfeed-images.html">Images</a>
-                  </li>
-                  <li>
-                    <a href="newsfeed-videos.html">Videos</a>
-                  </li>
-                </ul>
+                
               </li>
               <li className="dropdown">
                 {props.user ? (
@@ -78,7 +55,7 @@ const Header = props => {
                     </span>
                   </a>
                 ) : (
-                  <a href="/login">Đăng nhập</a>
+                  <a href="/login">Login</a>
                 )}
 
                 {props.user ? (

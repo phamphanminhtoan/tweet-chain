@@ -8,6 +8,8 @@ import Footer from "../../components/Footer";
 import NotFoundPage from "../NotFoundPage";
 import HomePage from "../HomePage";
 import Login from "../Login";
+import EditProfile from "../EditProfile";
+import Register from "../Register";
 import Test from "../Test";
 
 import "./style.css";
@@ -24,8 +26,10 @@ const App = props => {
       <Header />
 
         <Switch>
-          <Route path="/login" component={Login} />
           <Route path="/test" component={Test} />
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+          <PrivateRoute exact path="/edit-profile" component={EditProfile} />
           <PrivateRoute exact path="/" component={HomePage} />
           <Route path="" component={NotFoundPage} />
         </Switch>
