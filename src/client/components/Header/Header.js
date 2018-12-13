@@ -20,7 +20,7 @@ const Header = props => (
             <span className="icon-bar" />
           </button>
           <a className="navbar-brand" href="/">
-            <img src="public/images/tc.png" alt="logo" />
+            <img src="images/tc.png" alt="logo" />
           </a>
         </div>
         {/* Collect the nav links, forms, and other content for toggling */}

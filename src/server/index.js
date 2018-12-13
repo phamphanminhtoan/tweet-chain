@@ -11,6 +11,7 @@ app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Credentials', true);
     next();
 });
+app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use('/api', routes);
 app.listen(8080, () => console.log('Listening on port 8080!'));

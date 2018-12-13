@@ -9,25 +9,25 @@ const tempData = {
   fullName: "Ngô Hải Yến",
   address: "Hanoi City",
   followingPeople: "1,120",
-  avatarUrl: "public/images/users/avatar.jpg",
-  coverUrl: "../public/images/covers/cover.jpg"
+  avatarUrl: "images/users/avatar.jpg",
+  coverUrl: "../images/covers/cover.jpg"
 };
 
 const tempPostContent = {
   post: {
-    image: "public/images/post-images/15.jpg",
+    image: "images/post-images/15.jpg",
     createTime: "10/22/2016",
     content: " Lorem ipsum dolor sit amet, consectetur adipiscing elit",
     like: 123,
     dislike: 0,
     comments: [
       {
-        avatarUrl: "public/images/users/user-4.jpg",
+        avatarUrl: "images/users/user-4.jpg",
         username: "John",
         content: "Lorem ipsum dolor sit amet, consectetur adipiscing"
       },
       {
-        avatarUrl: "public/images/users/user-11.jpg",
+        avatarUrl: "images/users/user-11.jpg",
         username: " Diana",
         content: "Lorem ipsum dolor sit amet, consectetur adipiscing"
       }
@@ -36,8 +36,8 @@ const tempPostContent = {
       fullName: "Ngô Hải Yến",
       address: "Hanoi City",
       followingPeople: "1,120",
-      avatarUrl: "public/images/users/avatar.jpg",
-      coverUrl: "../public/images/covers/cover.jpg"
+      avatarUrl: "images/users/avatar.jpg",
+      coverUrl: "../images/covers/cover.jpg"
     }
   }
 };
