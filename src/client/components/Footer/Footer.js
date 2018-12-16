@@ -14,27 +14,27 @@ const Footer = props => {
               <ul className="list-inline social-icons">
                 <li>
                   <a href="/">
-                    <i className="icon ion-social-facebook" />
+                    <i className="fa fa-social-facebook" />
                   </a>
                 </li>
                 <li>
                   <a href="/">
-                    <i className="icon ion-social-twitter" />
+                    <i className="fa fa-social-twitter" />
                   </a>
                 </li>
                 <li>
                   <a href="/">
-                    <i className="icon ion-social-googleplus" />
+                    <i className="fa fa-social-googleplus" />
                   </a>
                 </li>
                 <li>
                   <a href="/">
-                    <i className="icon ion-social-pinterest" />
+                    <i className="fa fa-social-pinterest" />
                   </a>
                 </li>
                 <li>
                   <a href="/">
-                    <i className="icon ion-social-linkedin" />
+                    <i className="fa fa-social-linkedin" />
                   </a>
                 </li>
               </ul>
@@ -109,15 +109,15 @@ const Footer = props => {
               <h5>Contact Us</h5>
               <ul className="contact">
                 <li>
-                  <i className="icon ion-ios-telephone-outline" />
+                  <i className="fa fa-ios-telephone-outline" />
                   +84 326 326 736
                 </li>
                 <li>
-                  <i className="icon ion-ios-email-outline" />
+                  <i className="fa fa-ios-email-outline" />
                   phamphanminhtoan@gmail.com
                 </li>
                 <li>
-                  <i className="icon ion-ios-location-outline" />
+                  <i className="fa fa-ios-location-outline" />
                   227 Nguyen Van Cu, District 5, HCM city
                 </li>
               </ul>

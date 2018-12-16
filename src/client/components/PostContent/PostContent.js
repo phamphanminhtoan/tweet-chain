@@ -35,7 +35,7 @@ const PostContent = (props) => {
             </div>
             <div className="reaction">
               <a href="/" className="btn text-green">
-                <i className="icon ion-thumbsup" /> {Post.like}
+                <i className="fa fa-thumbs-up" /> {Post.like}
               </a>
               <a href="/" className="btn text-red">
                 <i className="fa fa-thumbs-down" /> {Post.dislike}

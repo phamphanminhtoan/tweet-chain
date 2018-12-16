@@ -85,7 +85,6 @@ const Header = props => (
           </ul>
           <form className="navbar-form navbar-right hidden-sm">
             <div className="form-group">
-              <i className="icon ion-android-search" />
               <input
                 type="text"
                 className="form-control"

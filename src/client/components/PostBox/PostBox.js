@@ -28,22 +28,22 @@ const PostBox = props => {
               <ul className="publishing-tools list-inline">
                 <li>
                   <a href="/">
-                    <i className="ion-compose" />
+                    <i className="fa fa-compose" />
                   </a>
                 </li>
                 <li>
                   <a href="/">
-                    <i className="ion-images" />
+                    <i className="fa fa-images" />
                   </a>
                 </li>
                 <li>
                   <a href="/">
-                    <i className="ion-ios-videocam" />
+                    <i className="fa fa-ios-videocam" />
                   </a>
                 </li>
                 <li>
                   <a href="/">
-                    <i className="ion-map" />
+                    <i className="fa fa-map" />
                   </a>
                 </li>
               </ul>
