@@ -8,7 +8,18 @@
     }
 }; */
 
+let { RpcClient } = require('tendermint');
+
+let client = RpcClient('wss://komodo.forest.network:443');
+
+// request a block
+
+
+
+
 exports.test = async (req, res) => {
     const params = req.body ? req.body : req.query;
-    res.send('Hello. This is server of Tweet Chain');
+    client.block({ height: 1 })
+  .then((result) => {res.send(result);});
 };
+
