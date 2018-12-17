@@ -77,7 +77,7 @@ const HomePage = props => {
           </div>
           <div className="col-md-2 static">
             <div id="sticky-sidebar">
-              <h4 className="grey">Hải Yến's activity</h4>
+              <h4 className="grey">Activity</h4>
               {tempActivities.map(activities => (
                 <Activities activities={activities} user={tempData}/>
               ))}
