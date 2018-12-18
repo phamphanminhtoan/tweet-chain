@@ -18,7 +18,7 @@ export function authUserFromServer() {
     await dispatch(authUser());
     await axios({
       method: "get",
-      url: "http://tweet-chain-server.glitch.me/getData",
+      url: "https://dawn-salesman.glitch.me/",
     })
       .then(data => {
         dispatch(authUserSuccess(data.data));
