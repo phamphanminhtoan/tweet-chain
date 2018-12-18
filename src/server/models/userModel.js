@@ -7,7 +7,7 @@ var userSchema = new Schema({
 	'post' : Array,
 	'picture' : String,
 	'following' : Array,
-	'paymemt' : Array
+	'payment' : Array
 });
 
 module.exports = mongoose.model('user', userSchema);

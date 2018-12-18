@@ -53,7 +53,7 @@ module.exports = {
 			post : req.body.post,
 			picture : req.body.picture,
 			following : req.body.following,
-			paymemt : req.body.paymemt
+			payment : req.body.payment
 
         });
 
@@ -91,7 +91,7 @@ module.exports = {
 			user.post = req.body.post ? req.body.post : user.post;
 			user.picture = req.body.picture ? req.body.picture : user.picture;
 			user.following = req.body.following ? req.body.following : user.following;
-			user.paymemt = req.body.paymemt ? req.body.paymemt : user.paymemt;
+			user.payment = req.body.payment ? req.body.payment : user.payment;
 			
             user.save(function (err, user) {
                 if (err) {
@@ -123,7 +123,7 @@ module.exports = {
     },
 
     updateFromBlock: async function(input) {
-        const { publicKey, name, post, picture, following, paymemt } = input;
+        const { publicKey, name, post, picture, following, payment } = input;
         if(publicKey){
             await userModel.findOne({publicKey: publicKey}, async function(err, user){
                 if(err)
@@ -136,7 +136,7 @@ module.exports = {
                         post : post,
                         picture : picture,
                         following : following,
-                        paymemt : paymemt
+                        payment : payment
                     });
                     await userCurrent.save(function (err, user) {
                         if (err) {
@@ -157,18 +157,28 @@ module.exports = {
                         user.post = post ? post : user.post;
                         user.picture = picture ? picture : user.picture;
                         user.following = following ? following : user.following;
-                        user.paymemt = paymemt ? paymemt : user.paymemt;
+                        user.payment = payment ? payment : user.payment;
                         
                         await user.save(function (err, user) {
                             if (err) {
                                 return false;
                             }
-            
                             return true;
                         });
                     });
                 }
             });
         }
+    },
+    getUserByPublicKey:  function (publicKey) {
+        userModel.findOne({publicKey: publicKey},function (err, user) {
+            if (err) 
+                return false;
+            if(!user)
+                return false
+                console.log('dang trong nay ne ma');
+            return user;
+        });
     }
+
 };

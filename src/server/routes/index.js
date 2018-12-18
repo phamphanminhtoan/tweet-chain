@@ -6,18 +6,18 @@ const {
 } = require('../controllers/test');
 
 const {
-  getBlock, showBlock, decode
+  SyncDatabase, getAndUpdateUser, decode
  } = require('../controllers/block');
 
 router.route('/test')
   .get(test);
 
 //Block
-router.route('/block/get-block/:height')
-  .get(getBlock);
+router.route('/block/sync')
+  .get(SyncDatabase);
 
-router.route('/block/show-block')
-  .get(showBlock);
+router.route('/block/get-user/:publicKey')
+  .get(getAndUpdateUser);
 
 router.route('/block/decode')
   .post(decode);
