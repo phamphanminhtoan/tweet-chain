@@ -12,7 +12,15 @@
 // request a block
 exports.test = async (req, res) => {
     const params =   req.body ? req.body : req.query;
-   res.send("Hello This is server of TweetChain");
+    res.send('ok');
+    setInterval(function(){ console.log('test'); }, 3000);
+
 };
+
+exports.test1 = async (req, res) => {
+  const params =   req.body ? req.body : req.query;
+  res.send('dc roi ne');
+};
+
 
 

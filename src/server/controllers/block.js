@@ -1,56 +1,99 @@
 let { RpcClient } = require("tendermint");
 let client = RpcClient("wss://komodo.forest.network:443");
-var _ = require("lodash");
 const axios = require('axios');
-var userController = require("./userController.js");
+var _ = require("lodash");
+
 const { encode, sign, decode } = require("../../client/helpers/lib/tx/index");
 
-// request a block
-var result = [];
-let user = {
-  publicKey: "",
-  name: "",
-  post: null,
-  picture: "",
-  following: null,
-  payment: null,
-  sequence: '',
-};
+
 exports.SyncDatabase = async (req, res) => {
   const params = req.body ? req.body : req.query;
   //Loop from #1 to #lastest Block 
-  res.send("Running .. .. .. ");
-  console.log('hello');
-  for (let i = 1; i < 11000; i++) {
-    await client.block({ height: i }).then(res => {
-        if(i === 10999)
-        console.log('done');
-      let txs = res.block.data.txs;
-      console.log(i);
-      if (txs) {
-        for(let j=0; j<txs.length; j++)
-        {
-          let blockData = decode(Buffer.from(txs[j], "base64"));
-          console.log(blockData.operation);
-          console.log(i);
-          console.log("------------")
-          if (blockData.operation === "create_account") {
-            resetUser();
-            console.log( blockData.params.address);
-            user.publicKey = blockData.params.address;
-             userController.updateFromBlock(user).then(()=>{
-             }); 
-          }
-          result.push(blockData);
+  try {
+    res.send("Running .. .. .. ");
+    //Define ParseObject
+    const Users = Parse.Object.extend('Users');
+    const System = Parse.Object.extend('System');
+    const querySystem = new Parse.Query(System);
+    querySystem.equalTo('objectId', 'f0CJqh5TLf');
+    //Loop from #1 block to #lastest Block
+    console.log('hello');
+    for (let i = 1; i < 11000; i++) {
+      await client.block({ height: i }).then(res => {
+        let txs = res.block.data.txs;
+        console.log(i);
+        if (txs) {
+          for(let j=0; j<txs.length; j++)
+          {
+            let blockData = decode(Buffer.from(txs[j], "base64"));
+            console.log(blockData.operation);
+            console.log("------------")
+            if (blockData.operation === "create_account") {
+              const newUsers = new Users();
+              console.log( blockData.params.address);
+              newUsers.publicKey = blockData.params.address;
+              newUsers.set('publicKey', blockData.params.address);
+              //Save New user
+              newUsers.save().then(
+                (result) => {
+                  console.log(result);
+                },
+                (error) => {
+                  throw new Error(err);
+                }
+              );
+            }//end create_account
+            if(blockData.operation === "update_account"){
+              const queryUsers = new Parse.Query(Users);
+              if(blockData.params.key === "name")
+              {
+                queryUsers.equalTo("publicKey", blockData.account );
+                queryUsers.first().then((user) => {
+                  user.set('name', blockData.params.value.toString('utf-8'));
+                  user.save().then((response) => {
+                    console.log(response);
+                  })
+                }, (error) => {
+                  throw new Error(err);
+                });
+              }
+              if(blockData.params.key === "picture")
+              {
+                queryUsers.equalTo("publicKey", blockData.account );
+                queryUsers.first().then((user) => {
+                  let dataImage = 'data:image/jpeg;base64,' + blockData.params.value.toString('base64');
+                  user.set('picture', dataImage);
+                  user.save().then((response) => {
+                    console.log(response);
+                  })
+                }, (error) => {
+                  throw new Error(err);
+                });
+              }
+            } // end update_account
+            //Check last block and update currentBlock
+            if(i === 10999)
+            {
+                querySystem.first().then(system => {
+                system.set('currentBlock' ,i);
+                system.save().then(()=>{
+                }).catch(err=>{
+                    throw new Error(err);
+                })
+              })
+            }
+          }// end Loop
         }
-      }
-    }).catch(err=>{
-      console.log(err);
-    });
+      }).catch(err=>{
+        throw new Error(err);
+      });
+    }
+  }catch(error){
+    res.status(500).send(error);
   }
 };
 
-exports.getAndUpdateUser = async (req, res) => {
+/* exports.getAndUpdateUser = async (req, res) => {
   resetUser();
   const params = req.body ? req.body : req.query;
   let sequence;
@@ -87,12 +130,9 @@ exports.getAndUpdateUser = async (req, res) => {
     console.log(error);
   });
 };
+ */
 
 
-exports.showBlock = async (req, res) => {
-  const params = req.body ? req.body : req.query;
-  res.send(result);
-};
 
 exports.decode = async (req, res) => {
   const params = req.body ? req.body : req.query;
@@ -105,14 +145,4 @@ exports.decode = async (req, res) => {
   }
 };
 
-/// reset Object
-function resetUser() {
-  user = {
-    publicKey: "",
-    name: "",
-    post: null,
-    picture: "",
-    following: null,
-    payment: null
-  };
-}
+

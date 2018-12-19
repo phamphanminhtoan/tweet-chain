@@ -1,26 +1,28 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const {
- test
-} = require('../controllers/test');
+const { test, test1 } = require("../controllers/test");
 
 const {
-  SyncDatabase, getAndUpdateUser, decode
- } = require('../controllers/block');
+  SyncDatabase,
+  getAndUpdateUser,
+  decode
+} = require("../controllers/block");
 
-router.route('/test')
-  .get(test);
+const { getUser, syncUser } = require("../controllers/user");
+
+router.route("/test").get(test);
+
+router.route("/test1").get(test1);
 
 //Block
-router.route('/block/sync')
-  .get(SyncDatabase);
+router.route("/block/sync").get(SyncDatabase);
 
-router.route('/block/get-user/:publicKey')
-  .get(getAndUpdateUser);
+router.route("/block/decode").post(decode);
 
-router.route('/block/decode')
-  .post(decode);
+//User
+router.route("/user/get-user/:publicKey").get(getUser);
 
+router.route("/user/sync-user/:publicKey").get(syncUser);
 
 module.exports = router;
