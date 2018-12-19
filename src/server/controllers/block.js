@@ -14,12 +14,17 @@ exports.SyncDatabase = async (req, res) => {
     //Define ParseObject
     const Users = Parse.Object.extend('Users');
     const System = Parse.Object.extend('System');
+    const Post = Parse.Object.extend('Post');
     const querySystem = new Parse.Query(System);
     querySystem.equalTo('objectId', 'f0CJqh5TLf');
+    await querySystem.first().then(async system => {
     //Loop from #1 block to #lastest Block
     console.log('hello');
-    for (let i = 1; i < 11000; i++) {
-      await client.block({ height: i }).then(res => {
+    systemJSON = system.toJSON();
+    console.log(systemJSON.currentBlock);
+    console.log(systemJSON.lastestBlock);
+    for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) {
+      await client.block({ height: i }).then(async res => {
         let txs = res.block.data.txs;
         console.log(i);
         if (txs) {
@@ -34,7 +39,7 @@ exports.SyncDatabase = async (req, res) => {
               newUsers.publicKey = blockData.params.address;
               newUsers.set('publicKey', blockData.params.address);
               //Save New user
-              newUsers.save().then(
+              await newUsers.save().then(
                 (result) => {
                   console.log(result);
                 },
@@ -48,9 +53,9 @@ exports.SyncDatabase = async (req, res) => {
               if(blockData.params.key === "name")
               {
                 queryUsers.equalTo("publicKey", blockData.account );
-                queryUsers.first().then((user) => {
+                await queryUsers.first().then(async (user) => {
                   user.set('name', blockData.params.value.toString('utf-8'));
-                  user.save().then((response) => {
+                  await user.save().then((response) => {
                     console.log(response);
                   })
                 }, (error) => {
@@ -60,10 +65,10 @@ exports.SyncDatabase = async (req, res) => {
               if(blockData.params.key === "picture")
               {
                 queryUsers.equalTo("publicKey", blockData.account );
-                queryUsers.first().then((user) => {
+                await queryUsers.first().then(async (user) => {
                   let dataImage = 'data:image/jpeg;base64,' + blockData.params.value.toString('base64');
                   user.set('picture', dataImage);
-                  user.save().then((response) => {
+                  await user.save().then((response) => {
                     console.log(response);
                   })
                 }, (error) => {
@@ -71,78 +76,90 @@ exports.SyncDatabase = async (req, res) => {
                 });
               }
             } // end update_account
+            if(blockData.operation === "post"){
+              let content =  JSON.parse(blockData.params.content.toString('utf-8'));
+              if(content.type === 1)
+              { 
+                const userPointer = new Users();
+                const post = new Post();
+                const queryUsers = new Parse.Query(Users);
+                queryUsers.equalTo("publicKey", blockData.account);
+                await queryUsers.first().then(async result=>{
+                  userPointer.id = result.id;
+                  post.set('user', userPointer);
+                  post.set('text', content.text);
+                  post.set('type', content.type)
+                  await post.save().then(result=>{
+                    console.log(result);
+                  })
+                });
+              }
+            }//end post
             //Check last block and update currentBlock
-            if(i === 10999)
-            {
-                querySystem.first().then(system => {
-                system.set('currentBlock' ,i);
-                system.save().then(()=>{
-                }).catch(err=>{
-                    throw new Error(err);
-                })
-              })
-            }
           }// end Loop
         }
       }).catch(err=>{
         throw new Error(err);
       });
+      if(i === system.lastestBlock)
+      {
+          system.set('currentBlock' ,i);
+          await system.save().then((system)=>{
+            console.log(system);
+          }).catch(err=>{
+              throw new Error(err);
+          });
+        await console.log('Done');
+      }
     }
+  });
   }catch(error){
     res.status(500).send(error);
   }
 };
-
-/* exports.getAndUpdateUser = async (req, res) => {
-  resetUser();
-  const params = req.body ? req.body : req.query;
-  let sequence;
-  //Set PublicKey
-  user.publicKey = req.params.publicKey;
-  let url = `https://komodo.forest.network/tx_search?query="account='${req.params.publicKey}'"`;
-  await axios.get(url)
-  .then(async function (response) {
-    if(response.data.result)
-    {
-      let txs =response.data.result.txs;
-      for(let i=0; i<txs.length; i++)
-      {
-        let transData = decode(Buffer.from(txs[i].tx, "base64"));
-        if(transData.operation === "update_account"){
-          if(transData.params.key === "name")
-          {
-            user.name = transData.params.value.toString('utf-8');
-          }
-        } 
-        if(transData.account === req.params.publicKey)
-          user.sequence = transData.sequence;
-      }
-      await userController.updateFromBlock(user);
-    }
-    console.log("------------------");
-    let test = await userController.getUserByPublicKey(req.params.publicKey);
-    await console.log(test);
-    if(test)
-   res.send(test);
-  })
-  .catch(function (error) {
-    // handle error
-    console.log(error);
-  });
-};
- */
-
-
 
 exports.decode = async (req, res) => {
   const params = req.body ? req.body : req.query;
   const tx = req.body.tx;
   if (tx) {
     const decodeData = decode(Buffer.from(tx, "base64"));
-    res.send(decodeData);
+    if(decodeData.operation === "post")
+    {
+      let text = decodeData.params.content.toString('utf-8');
+      res.send(text);
+    }
+  
   } else {
     res.send("error");
   }
 };
+
+exports.getLastestBlock = async (req, res) => {
+  const params = req.body ? req.body : req.query;
+  try {
+     const System = Parse.Object.extend('System');
+    const querySystem = new Parse.Query(System);
+    querySystem.equalTo('objectId', 'f0CJqh5TLf'); 
+    res.send('running .. .. ..');
+    client.subscribe({  
+      query: "tm.event='NewBlock'",
+      jsonrpc: "2.0"
+    }, async (result) => {
+      if(result)
+      {
+        await querySystem.first().then(async system => {
+          system.set('lastestBlock' ,parseInt(result.block.header.height));
+          await system.save().then((system)=>{
+          }).catch(err=>{
+              throw new Error(err);
+          })
+        });
+      }
+    });
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 
 
