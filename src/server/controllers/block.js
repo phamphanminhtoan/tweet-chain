@@ -25,8 +25,7 @@ exports.SyncDatabase = async (req, res) => {
     systemJSON = system.toJSON();
     console.log(systemJSON.currentBlock);
     console.log(systemJSON.lastestBlock);
-/*      for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) {  */
-  for (let i = systemJSON.currentBlock+1; i <= systemJSON.lastestBlock; i++) { 
+    for (let i = systemJSON.currentBlock+1; i <= systemJSON.lastestBlock; i++) { 
       await client.block({ height: i }).then(async res => {
         let txs = res.block.data.txs;
          console.log(i); 
@@ -102,7 +101,7 @@ exports.SyncDatabase = async (req, res) => {
                     ownerUser.equalTo('publicKey' , blockData.account);
                     await ownerUser.first().then(async owner =>{
                       owner.set('sequence', blockData.sequence);
-                      await onwer.save().then(()=>{
+                      await owner.save().then(()=>{
                           console.log('done post');
                       });
                     });
@@ -125,7 +124,7 @@ exports.SyncDatabase = async (req, res) => {
                     ownerUser.equalTo('publicKey' , blockData.account);
                     await ownerUser.first().then(async owner =>{
                       owner.set('sequence', blockData.sequence);
-                      await onwer.save().then(()=>{
+                      await owner.save().then(()=>{
                           console.log('done post');
                       });
                     });
@@ -167,7 +166,7 @@ exports.SyncDatabase = async (req, res) => {
      }//end Loop container 
   });
   }catch(error){
-    res.status(500).send(error);
+    console.log(error);
   }
 };      
 
