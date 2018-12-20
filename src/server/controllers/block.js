@@ -3,6 +3,7 @@ let client = RpcClient("wss://komodo.forest.network:443");
 const axios = require('axios');
 var _ = require("lodash");
 var moment = require("moment");
+var http = require("http-https");
 
 const { encode, sign, decode } = require("../../client/helpers/lib/tx/index");
 
@@ -25,7 +26,7 @@ exports.SyncDatabase = async (req, res) => {
     console.log(systemJSON.currentBlock);
     console.log(systemJSON.lastestBlock);
 /*      for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) {  */
-  for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) { 
+  for (let i = systemJSON.currentBlock+1; i <= systemJSON.lastestBlock; i++) { 
       await client.block({ height: i }).then(async res => {
         let txs = res.block.data.txs;
          console.log(i); 
@@ -161,16 +162,8 @@ exports.SyncDatabase = async (req, res) => {
       }).catch(err=>{
         throw new Error(err);
       });
-       if(i == systemJSON.lastestBlock)
-      {
-          system.set('currentBlock' ,i);
-          await system.save().then((system)=>{
-            console.log(system);
-          }).catch(err=>{
-              throw new Error(err);
-          });
-        await console.log('Done');
-      } 
+      //Update Current Block
+      await http.get('https://tweet-update-system.glitch.me/update/'+ i);
      }//end Loop container 
   });
   }catch(error){

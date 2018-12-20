@@ -4,6 +4,7 @@ const routes = require('./routes');
 var path = require('path');
 const app = express();
 const Parse = require('parse/node');
+var http = require("http-https");
 
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,4 +37,6 @@ Parse.initialize(
 );
 
 global.Parse = Parse;
+//http.get('https://tweetchain.glitch.me/api/block/sync');
+//http.get('https://tweetchain.glitch.me/api/block/get-lastest-block');
 app.listen(8080, () => console.log('Listening on port 8080!'));
