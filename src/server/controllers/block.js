@@ -2,6 +2,7 @@ let { RpcClient } = require("tendermint");
 let client = RpcClient("wss://komodo.forest.network:443");
 const axios = require('axios');
 var _ = require("lodash");
+var moment = require("moment");
 
 const { encode, sign, decode } = require("../../client/helpers/lib/tx/index");
 
@@ -19,14 +20,15 @@ exports.SyncDatabase = async (req, res) => {
     querySystem.equalTo('objectId', 'f0CJqh5TLf');
     await querySystem.first().then(async system => {
     //Loop from #1 block to #lastest Block
-    console.log('hello');
+    console.log('run');
     systemJSON = system.toJSON();
     console.log(systemJSON.currentBlock);
     console.log(systemJSON.lastestBlock);
-    for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) {
+/*      for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) {  */
+  for (let i = 1; i <= 50; i++) { 
       await client.block({ height: i }).then(async res => {
         let txs = res.block.data.txs;
-        console.log(i);
+         console.log(i); 
         if (txs) {
           for(let j=0; j<txs.length; j++)
           {
@@ -35,13 +37,14 @@ exports.SyncDatabase = async (req, res) => {
             console.log("------------")
             if (blockData.operation === "create_account") {
               const newUsers = new Users();
-              console.log( blockData.params.address);
               newUsers.publicKey = blockData.params.address;
               newUsers.set('publicKey', blockData.params.address);
+              newUsers.set('balance', 0);
+              newUsers.set('sequence', blockData.sequence);
               //Save New user
               await newUsers.save().then(
                 (result) => {
-                  console.log(result);
+                  console.log('done create');
                 },
                 (error) => {
                   throw new Error(err);
@@ -55,8 +58,9 @@ exports.SyncDatabase = async (req, res) => {
                 queryUsers.equalTo("publicKey", blockData.account );
                 await queryUsers.first().then(async (user) => {
                   user.set('name', blockData.params.value.toString('utf-8'));
+                  user.set('sequence', blockData.sequence);
                   await user.save().then((response) => {
-                    console.log(response);
+                    console.log('done update');
                   })
                 }, (error) => {
                   throw new Error(err);
@@ -68,8 +72,9 @@ exports.SyncDatabase = async (req, res) => {
                 await queryUsers.first().then(async (user) => {
                   let dataImage = 'data:image/jpeg;base64,' + blockData.params.value.toString('base64');
                   user.set('picture', dataImage);
+                  user.set('sequence', blockData.sequence);
                   await user.save().then((response) => {
-                    console.log(response);
+                    console.log('done update');
                   })
                 }, (error) => {
                   throw new Error(err);
@@ -77,6 +82,7 @@ exports.SyncDatabase = async (req, res) => {
               }
             } // end update_account
             if(blockData.operation === "post"){
+              try{
               let content =  JSON.parse(blockData.params.content.toString('utf-8'));
               if(content.type === 1)
               { 
@@ -88,20 +94,74 @@ exports.SyncDatabase = async (req, res) => {
                   userPointer.id = result.id;
                   post.set('user', userPointer);
                   post.set('text', content.text);
-                  post.set('type', content.type)
-                  await post.save().then(result=>{
-                    console.log(result);
-                  })
+                  post.set('type', content.type);
+                  post.set('createTime', new Date(res.block.header.time)); 
+                  await post.save().then(async result=>{
+                    const ownerUser = new Parse.Query(Users);
+                    ownerUser.equalTo('publicKey' , blockData.account);
+                    await ownerUser.first().then(async owner =>{
+                      owner.set('sequence', blockData.sequence);
+                      await onwer.save().then(()=>{
+                          console.log('done post');
+                      });
+                    });
+                  });
                 });
               }
+              }catch(err){
+                let content =  blockData.params.content.toString('utf-8');
+                const userPointer = new Users();
+                const post = new Post();
+                const queryUsers = new Parse.Query(Users);
+                queryUsers.equalTo("publicKey", blockData.account);
+                await queryUsers.first().then(async result=>{
+                  userPointer.id = result.id;
+                  post.set('user', userPointer);
+                  post.set('text', content);
+                  post.set('createTime', new Date(res.block.header.time)); 
+                  await post.save().then(async result=>{
+                    const ownerUser = new Parse.Query(Users);
+                    ownerUser.equalTo('publicKey' , blockData.account);
+                    await ownerUser.first().then(async owner =>{
+                      owner.set('sequence', blockData.sequence);
+                      await onwer.save().then(()=>{
+                          console.log('done post');
+                      });
+                    });
+                  });
+                });
+              };
             }//end post
+            if (blockData.operation === "payment") {
+              const ownerUser = new Parse.Query(Users);
+              ownerUser.equalTo('publicKey' , blockData.account);
+                await ownerUser.first().then(async owner=>{
+                  if(blockData.account !== "GA6IW2JOWMP4WGI6LYAZ76ZPMFQSJAX4YLJLOQOWFC5VF5C6IGNV2IW7")
+                  {
+                    let ownerBalance =  parseInt(owner.toJSON().balance) - parseInt(blockData.params.amount);
+                    owner.set('balance', ownerBalance);
+                  }
+                  owner.set('sequence', parseInt(blockData.sequence));
+                  await owner.save().then(async result1=>{
+                    const targetUser = new Parse.Query(Users); 
+                    targetUser.equalTo('publicKey' , blockData.params.address);
+                    await targetUser.first().then(async target=>{
+                      let targetBalance =  parseInt(target.toJSON().balance) + parseInt(blockData.params.amount);
+                      target.set('balance', targetBalance);
+                      await target.save().then(result2=>{
+                        console.log('done payment');
+                      });
+                    });
+                  });
+                });
+            }//end payment
             //Check last block and update currentBlock
           }// end Loop
         }
       }).catch(err=>{
         throw new Error(err);
       });
-      if(i === system.lastestBlock)
+       if(i == 50)
       {
           system.set('currentBlock' ,i);
           await system.save().then((system)=>{
@@ -110,25 +170,26 @@ exports.SyncDatabase = async (req, res) => {
               throw new Error(err);
           });
         await console.log('Done');
-      }
-    }
+      } 
+     }//end Loop container 
   });
   }catch(error){
     res.status(500).send(error);
   }
-};
+};      
 
 exports.decode = async (req, res) => {
   const params = req.body ? req.body : req.query;
   const tx = req.body.tx;
+  let result = {};
   if (tx) {
     const decodeData = decode(Buffer.from(tx, "base64"));
     if(decodeData.operation === "post")
     {
-      let text = decodeData.params.content.toString('utf-8');
-      res.send(text);
+      let text = decodeData.params.content.toString(8);
+
     }
-  
+    res.send(decodeData);
   } else {
     res.send("error");
   }
@@ -152,7 +213,7 @@ exports.getLastestBlock = async (req, res) => {
           await system.save().then((system)=>{
           }).catch(err=>{
               throw new Error(err);
-          })
+          });
         });
       }
     });
