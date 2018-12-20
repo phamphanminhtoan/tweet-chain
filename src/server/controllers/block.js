@@ -6,6 +6,8 @@ var moment = require("moment");
 var http = require("http-https");
 
 const { encode, sign, decode } = require("../../client/helpers/lib/tx/index");
+const {decodeFollow } = require("../../client/helpers/lib/tx/v1");
+const base32 = require('base32.js');
 
 
 exports.SyncDatabase = async (req, res) => {
@@ -176,12 +178,13 @@ exports.decode = async (req, res) => {
   let result = {};
   if (tx) {
     const decodeData = decode(Buffer.from(tx, "base64"));
-    if(decodeData.operation === "post")
+    if(decodeData.operation === "update_account")
     {
-      let text = decodeData.params.content.toString(8);
-
+      let addresses = decodeFollow(decodeData.params.value).addresses
+      let test = base32.encode(addresses[0]);
+      res.send(test);
     }
-    res.send(decodeData);
+    
   } else {
     res.send("error");
   }
