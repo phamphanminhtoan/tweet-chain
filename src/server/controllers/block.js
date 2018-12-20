@@ -25,7 +25,7 @@ exports.SyncDatabase = async (req, res) => {
     console.log(systemJSON.currentBlock);
     console.log(systemJSON.lastestBlock);
 /*      for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) {  */
-  for (let i = 1; i <= 50; i++) { 
+  for (let i = systemJSON.currentBlock; i <= systemJSON.lastestBlock; i++) { 
       await client.block({ height: i }).then(async res => {
         let txs = res.block.data.txs;
          console.log(i); 
@@ -161,7 +161,7 @@ exports.SyncDatabase = async (req, res) => {
       }).catch(err=>{
         throw new Error(err);
       });
-       if(i == 50)
+       if(i == systemJSON.lastestBlock)
       {
           system.set('currentBlock' ,i);
           await system.save().then((system)=>{
