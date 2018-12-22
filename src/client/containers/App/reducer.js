@@ -1,6 +1,6 @@
 //Init Value of State
 const initStateMessage = {
-  isAuthenticated: true,
+  isAuthenticated: false,
   error: false,
   user: {}
 };

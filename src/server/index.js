@@ -29,11 +29,11 @@ app.get('/*', function(req, res) {
 
 //connect to database
 
-Parse.serverURL = 'https://parseapi.back4app.com'; // This is your Server URL
+Parse.serverURL = 'http://localhost:1337/api'; // This is your Server URL
 Parse.initialize(
-  'CpENWYqSAVkGnRKsXe4ip03UVnnaOAPyqOUjJT1O', // This is your Application ID
-  'Bn1u0GSOZNqGEQLYGCPOgU4CqixAoUnteUT4h1cg', // This is your Javascript key
-  'opPkV9bgL4tq5aZQkoNnOp0GwYcf71oqKx8VAqa5' // This is your Master key (never use it in the frontend)
+  '14488a89b90d1701fa0d334fb85fad55eac86824', // This is your Application ID
+  '0aa56f45a45838c710c511558c2110a0dde9b578', // This is your Javascript key
+  'cd3881320fcb98ab539ee4de0a64ab9ea4dbb1c3' // This is your Master key (never use it in the frontend)
 );
 
 global.Parse = Parse;

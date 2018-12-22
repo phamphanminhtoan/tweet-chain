@@ -48,8 +48,8 @@ const PostContent = (props) => {
               </p>
             </div>
             <div className="line-divider" />
-            {Post.comments.map((comment)=>(
-                <PostComment comment={comment} />
+            {Post.comments.map((comment, index)=>(
+                <PostComment comment={comment} key={index} />
             ))}
             <div className="post-comment">
               <img

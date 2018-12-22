@@ -34,6 +34,7 @@
     "react-router-redux": "^4.0.8",
     "react-scripts": "2.1.1",
     "redux": "^4.0.1",
+    "redux-persist": "^5.10.0",
     "redux-thunk": "^2.3.0",
     "sequelize": "^4.42.0",
     "stellar-base": "^0.10.0",

@@ -1,4 +1,5 @@
 const axios = require("axios");
+const { Keypair } = require("stellar-base");
 
 export const authUser = () => ({
   type: "AUTH_USER"
@@ -13,18 +14,12 @@ export const authUserFailure = () => ({
   type: "AUTH_USER_FAILURE"
 });
 
-export function authUserFromServer() {
+export function handleAuthUser(user) {
+  console.log('hello');
   return async dispatch => {
     await dispatch(authUser());
-    await axios({
-      method: "get",
-      url: "https://dawn-salesman.glitch.me/",
-    })
-      .then(data => {
-        dispatch(authUserSuccess(data.data));
-      })
-      .catch(err => {
-        dispatch(authUserFailure());
-      });
+    let publicKey = Keypair.fromSecret(user.privateKey).publicKey();
+    if (publicKey === user.publicKey) dispatch(authUserSuccess(user));
+    else dispatch(authUserFailure());
   };
 }

@@ -29,15 +29,18 @@ const PostParams = vstruct([
   // >= 1 key => share with specific people, may including me. First 16/24 bytes of content are nonce/iv
   { name: 'keys', type: vstruct.VarArray(vstruct.UInt8, vstruct.Buffer(42)) },
 ]);
-
 const Followings = vstruct([
   { name: 'addresses', type: vstruct.VarArray(vstruct.UInt16BE, vstruct.Buffer(35)) },
 ]);
 
-
 const UpdateAccountParams = vstruct([
   { name: 'key', type: vstruct.VarString(vstruct.UInt8) },
   { name: 'value', type: vstruct.VarBuffer(vstruct.UInt16BE) },
+]);
+
+const PlainTextContent = vstruct([
+  { name: 'type', type: vstruct.UInt8 },
+  { name: 'text', type: vstruct.VarString(vstruct.UInt16BE) },
 ]);
 
 const InteractParams = vstruct([
@@ -108,6 +111,11 @@ function decodeFollow(tx) {
   return Followings.decode(tx)
 }
 
+function decodePost(tx) {
+  return PlainTextContent.decode(tx)
+}
+
+
 function decode(data) {
   const tx = Transaction.decode(data);
   if (tx.version !== 1) {
@@ -162,5 +170,6 @@ function decode(data) {
 module.exports = {
   encode,
   decode,
-  decodeFollow
+  decodeFollow,
+  decodePost
 };

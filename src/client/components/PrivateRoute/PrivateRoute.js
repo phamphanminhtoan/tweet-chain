@@ -1,9 +1,9 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
-import { authUserFromServer } from "../../containers/App/action";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
+  console.log(rest.isAuthenticated);
   return (
     <Route
       {...rest}
@@ -28,7 +28,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  authUserFromServer: () => dispatch(authUserFromServer())
 });
 
 export default connect(mapStateToProps,mapDispatchToProps)(PrivateRoute);

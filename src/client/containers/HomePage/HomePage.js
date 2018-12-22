@@ -78,8 +78,8 @@ const HomePage = props => {
           <div className="col-md-2 static">
             <div id="sticky-sidebar">
               <h4 className="grey">Activity</h4>
-              {tempActivities.map(activities => (
-                <Activities activities={activities} user={tempData}/>
+              {tempActivities.map((activities, index) => (
+                <Activities activities={activities} user={tempData} key={index} />
               ))}
             </div>
           </div>
