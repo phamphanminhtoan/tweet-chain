@@ -30,6 +30,11 @@ const PostParams = vstruct([
   { name: 'keys', type: vstruct.VarArray(vstruct.UInt8, vstruct.Buffer(42)) },
 ]);
 
+const PlainTextContent = vstruct([
+  { name: 'type', type: vstruct.UInt8 },
+  { name: 'text', type: vstruct.VarString(vstruct.UInt16BE) },
+]);
+
 const UpdateAccountParams = vstruct([
   { name: 'key', type: vstruct.VarString(vstruct.UInt8) },
   { name: 'value', type: vstruct.VarBuffer(vstruct.UInt16BE) },
@@ -67,7 +72,10 @@ function encode(tx) {
       break;
 
     case 'post':
-      params = PostParams.encode(tx.params);
+      params = PostParams.encode({
+        ...tx.params, 
+        content: PlainTextContent.encode(tx.params.content)
+      });
       operation = 3;
       break;
 
@@ -97,6 +105,10 @@ function encode(tx) {
     params,
     signature: tx.signature,
   });
+}
+
+function decodePost(data){
+  return PlainTextContent.decode(data)
 }
 
 function decode(data) {
@@ -153,4 +165,5 @@ function decode(data) {
 module.exports = {
   encode,
   decode,
+  decodePost
 };
