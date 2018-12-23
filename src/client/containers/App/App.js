@@ -6,7 +6,7 @@ import PrivateRoute from "../../components/PrivateRoute";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import NotFoundPage from "../NotFoundPage";
-import HomePage from "../HomePage";
+import Profile from "../Profile";
 import Login from "../Login";
 import EditProfile from "../EditProfile";
 import Register from "../Register";
@@ -23,14 +23,14 @@ const App = props => {
       >
         <meta name="description" content="Tweet-Chain" />
       </Helmet>
-      <Header />
-
+      <Header user={window.localStorage.getItem('User')}/>
         <Switch>
           <Route path="/test" component={Test} />
           <Route path="/login" component={Login} />
           <Route path="/register" component={Register} />
           <PrivateRoute exact path="/edit-profile" component={EditProfile} />
-          <PrivateRoute exact path="/" component={HomePage} />
+          <PrivateRoute exact path="/profile/:publicKey"  component={props => <Profile match={props.match.params} />} />
+          <PrivateRoute exact path="/" component={Profile} />
           <Route path="" component={NotFoundPage} />
         </Switch>
 

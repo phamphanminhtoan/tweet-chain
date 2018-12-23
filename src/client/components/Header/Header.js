@@ -1,5 +1,5 @@
-import React from 'react';
-import './style.css';
+import React from "react";
+import "./style.css";
 
 const Header = props => (
   <header id="header">
@@ -20,7 +20,7 @@ const Header = props => (
             <span className="icon-bar" />
           </button>
           <a className="navbar-brand" href="/">
-            <img src="images/tc.png" alt="logo" />
+            <img src="../images/tc.png" alt="logo" />
           </a>
         </div>
         {/* Collect the nav links, forms, and other content for toggling */}
@@ -29,15 +29,6 @@ const Header = props => (
           id="bs-example-navbar-collapse-1"
         >
           <ul className="nav navbar-nav navbar-right main-menu">
-            <li className="dropdown">
-              <a
-                href="/register"
-                className="dropdown-toggle"
-              >
-                Register
-              </a>
-
-            </li>
             <li className="dropdown">
               {props.user ? (
                 <a
@@ -50,12 +41,12 @@ const Header = props => (
                 >
                   {props.user.username}
                   <span>
-                  <i className="fa fa-sort-down"></i>
+                    <i className="fa fa-sort-down" />
                   </span>
                 </a>
               ) : (
-                  <a href="/login">Login</a>
-                )}
+                <a href="/login">Login</a>
+              )}
 
               {props.user ? (
                 <ul className="dropdown-menu login">
@@ -65,20 +56,21 @@ const Header = props => (
                   <li>
                     <a href="#">Edit Profile</a>
                   </li>
-                  <li>
-                    <a href="#">Log out</a>
-                  </li>
                 </ul>
               ) : (
-                  <div />
-                )}
+                <div />
+              )}
             </li>
             <li className="dropdown">
-              <a href="contact.html">
-                Contact
-                {' '}
+              <a
+                onClick={() => {
+                  window.localStorage.clear();
+                  window.location.href = "/";
+                }}
+              >
+                Log out
                 <span>
-                <i className="fa fa-sort-down"></i>
+                  <i className="fa fa-sort-down" />
                 </span>
               </a>
             </li>

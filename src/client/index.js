@@ -9,31 +9,20 @@ import { createStore, applyMiddleware } from "redux";
 import App from "./containers/App";
 import reducers from "./reducers";
 import thunk from "redux-thunk"; //import thunk
-import { persistStore, persistReducer } from "redux-persist";
-import storage from "redux-persist/lib/storage"; // defaults to localStorage for web and AsyncStorage for react-native
-import { PersistGate } from "redux-persist/integration/react";
 
-const persistConfig = {
-  key: "root",
-  storage
-};
 
-const persistedReducer = persistReducer(persistConfig, reducers);
 
 const history = createHistory();
 
-const store = createStore(persistedReducer, applyMiddleware(thunk));
-let persistor = persistStore(store);
+const store = createStore(reducers, applyMiddleware(thunk));
 
 class Application extends React.Component {
   render() {
     return (
       <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
           <Router history={history}>
             <App />
           </Router>
-        </PersistGate>
       </Provider>
     );
   }

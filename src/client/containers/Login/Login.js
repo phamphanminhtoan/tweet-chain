@@ -1,19 +1,19 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withRouter } from "react-router";
-import { fetchMessage } from "../App/action";
+import { handleAuthUser } from "../App/action";
 
 class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = { 
-      publickKey: '',
+      publicKey: '',
       privateKey: ''
      }
   }
 
   handleChangePublicKey = (e)=>{
-    this.setState({ publickKey: e.target.value });
+    this.setState({ publicKey: e.target.value });
   }
 
   handleChangePrivateKey = (e)=>{
@@ -35,7 +35,6 @@ class Login extends React.Component {
               <h3 className="panel-title">Login Tweet Chain</h3>
             </div>
             <div className="panel-body">
-              <form acceptCharset="UTF-8" role="form">
                 <fieldset>
                   <div className="form-group">
                     <input className="form-control" placeholder="Public Key" name="publicKey" type="text" onChange={this.handleChangePublicKey} />
@@ -48,12 +47,11 @@ class Login extends React.Component {
                       <input name="remember" type="checkbox" defaultValue="Remember Me" /> Remember Me
                     </label>
                   </div>
-                  <button className="btn btn-lg btn-success btn-block" type="submit" onClick={this.handleLogin} >Login</button>
+                  <button className="btn btn-lg btn-success btn-block" onClick={this.handleLogin} >Login</button>
                 </fieldset>
-              </form>
               <hr />
               <center><h4>OR</h4></center>
-              <button className="btn btn-lg btn-facebook btn-block" type="submit" >Sign Up</button>
+              <button className="btn btn-lg btn-facebook btn-block"  >Sign Up</button>
             </div>
           </div>
         </div>

@@ -15,11 +15,16 @@ export const authUserFailure = () => ({
 });
 
 export function handleAuthUser(user) {
-  console.log('hello');
+  console.log(user.publicKey);
+  console.log(user.privateKey);
   return async dispatch => {
     await dispatch(authUser());
     let publicKey = Keypair.fromSecret(user.privateKey).publicKey();
-    if (publicKey === user.publicKey) dispatch(authUserSuccess(user));
+    if (publicKey === user.publicKey) {
+      dispatch(authUserSuccess(user));
+      window.localStorage.setItem('User', user);
+      window.location.href = "/";
+    }
     else dispatch(authUserFailure());
   };
 }

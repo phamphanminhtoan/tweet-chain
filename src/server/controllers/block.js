@@ -1,15 +1,24 @@
 let { RpcClient } = require("tendermint");
-let client = RpcClient("wss://komodo.forest.network:443");
+let client = RpcClient("wss://zebra.forest.network:443");
 const axios = require("axios");
 var _ = require("lodash");
 var moment = require("moment");
 var http = require("http-https");
 
-const { encode, sign, decode } = require("../../client/helpers/lib/tx/index");
+const { encode, sign, decode, hash } = require("../../client/helpers/lib/tx/index");
 const { decodeFollow, decodePost } = require("../../client/helpers/lib/tx/v1");
 const { calculateEnergy } = require("../../client/helpers/lib/energy");
 const base32 = require("base32.js");
 
+let serverBlockUrl = [
+  "https://komodo.forest.network/",
+  "https://zebra.forest.network/",
+  "https://dragonfly.forest.network/",
+  "https://gorilla.forest.network/",
+  "https://fox.forest.network/"
+];
+let current = 3553;
+let indexServerUrl = 0;
 exports.SyncDatabase = async (req, res) => {
   const params = req.body ? req.body : req.query;
   //Loop from #1 to #lastest Block
@@ -19,7 +28,10 @@ exports.SyncDatabase = async (req, res) => {
     const Users = Parse.Object.extend("Users");
     const System = Parse.Object.extend("System");
     const Post = Parse.Object.extend("Post");
+    const Transaction = Parse.Object.extend("Transaction");
+    const Notification = Parse.Object.extend("Notification");
     const querySystem = new Parse.Query(System);
+    let contentNotif = '';
     querySystem.equalTo("objectId", "grAZBFQi8n");
     await querySystem.first().then(async system => {
       //Loop from #1 block to #lastest Block
@@ -27,15 +39,20 @@ exports.SyncDatabase = async (req, res) => {
       systemJSON = system.toJSON();
       console.log(systemJSON.currentBlock);
       console.log(systemJSON.lastestBlock);
-      for (let i = 7541; i <= 16294; i++) {
-        await client
-          .block({ height: i })
+      for (let i = current; i <= 14000; i++) {
+        current = i;
+        await axios
+          .get("https://komodo.forest.network/" + "block?height=" + i, {
+            jsonrpc: "2.0"
+          })
           .then(async res => {
-            let txs = res.block.data.txs;
+            let txs = res.data.result.block.data.txs; 
+            let timeBlock = res.data.result.block.header.time;
             console.log(i);
             if (txs) {
               for (let j = 0; j < txs.length; j++) {
                 let blockData = decode(Buffer.from(txs[j], "base64"));
+                let hashCode = hash(blockData);
                 console.log(blockData.operation);
                 console.log("------------");
                 if (blockData.operation === "create_account") {
@@ -44,17 +61,18 @@ exports.SyncDatabase = async (req, res) => {
                   newUsers.set("publicKey", blockData.params.address);
                   newUsers.set("balance", 0);
                   newUsers.set("sequence", 0);
-                  newUsers.set("createTime", new Date(res.block.header.time));
+                  newUsers.set("createTime", new Date(timeBlock));
                   //Save New user
                   await newUsers.save().then(
                     result => {
+                      contentNotif = "Create user";
                       console.log("done create");
                     },
                     error => {
                       console.log(error);
                     }
                   );
-                } //end create_account
+                } //end create_account  
                 if (blockData.operation === "update_account") {
                   const queryUsers = new Parse.Query(Users);
                   if (blockData.params.key === "name") {
@@ -66,8 +84,9 @@ exports.SyncDatabase = async (req, res) => {
                           blockData.params.value.toString("utf-8")
                         );
                         user.set("sequence", blockData.sequence);
-                        user.set("lastTransaction", new Date(res.block.header.time));
+                        user.set("lastTransaction", new Date(timeBlock));
                         await user.save().then(response => {
+                          contentNotif = "Update name";
                           console.log("done update name");
                         });
                       },
@@ -85,8 +104,9 @@ exports.SyncDatabase = async (req, res) => {
                           blockData.params.value.toString("base64");
                         user.set("picture", dataImage);
                         user.set("sequence", blockData.sequence);
-                        user.set("lastTransaction", new Date(res.block.header.time));
+                        user.set("lastTransaction", new Date(timeBlock));
                         await user.save().then(response => {
+                          contentNotif = "Update Avatar";
                           console.log("done update picture");
                         });
                       },
@@ -108,8 +128,9 @@ exports.SyncDatabase = async (req, res) => {
                         async user => {
                           user.set("followings", result);
                           user.set("sequence", blockData.sequence);
-                          user.set("lastTransaction", new Date(res.block.header.time));
+                          user.set("lastTransaction", new Date(timeBlock));
                           await user.save().then(response => {
+                            contentNotif = "Update Followings";
                             console.log("done update followings");
                           });
                         },
@@ -119,6 +140,15 @@ exports.SyncDatabase = async (req, res) => {
                       );
                     } catch (error) {
                       console.log(error);
+                      const ownerUser = new Parse.Query(Users);
+                      ownerUser.equalTo("publicKey", blockData.account);
+                      await ownerUser.first().then(async owner => {
+                        owner.set("sequence", blockData.sequence);
+                        owner.set("lastTransaction", new Date(timeBlock));
+                        await owner.save().then(() => {
+                          console.log("done update Sequence");
+                        });
+                      });
                     }
                   }
                 } // end update_account
@@ -134,14 +164,16 @@ exports.SyncDatabase = async (req, res) => {
                       post.set("user", userPointer);
                       post.set("text", content.text);
                       post.set("type", parseInt(content.type));
-                      post.set("createTime", new Date(res.block.header.time));
+                      post.set("createTime", new Date(timeBlock));
+                      post.set("hashCode", hashCode);
                       await post.save().then(async result => {
                         const ownerUser = new Parse.Query(Users);
                         ownerUser.equalTo("publicKey", blockData.account);
                         await ownerUser.first().then(async owner => {
                           owner.set("sequence", blockData.sequence);
-                          owner.set("lastTransaction", new Date(res.block.header.time));
+                          owner.set("lastTransaction", new Date(timeBlock));
                           await owner.save().then(() => {
+                            contentNotif = "Post content";
                             console.log("done post");
                           });
                         });
@@ -149,9 +181,20 @@ exports.SyncDatabase = async (req, res) => {
                     });
                   } catch (err) {
                     console.log(err);
+                    const ownerUser = new Parse.Query(Users);
+                    ownerUser.equalTo("publicKey", blockData.account);
+                    await ownerUser.first().then(async owner => {
+                      owner.set("sequence", blockData.sequence);
+                      owner.set("lastTransaction", new Date(timeBlock));
+                      await owner.save().then(() => {
+                        contentNotif = "Post content fail";
+                        console.log("done update Sequence");
+                      });
+                    });
                   }
                 } //end post
                 if (blockData.operation === "payment") {
+                  let ownerUserId, targetUserId;
                   const ownerUser = new Parse.Query(Users);
                   ownerUser.equalTo("publicKey", blockData.account);
                   await ownerUser.first().then(async owner => {
@@ -159,13 +202,12 @@ exports.SyncDatabase = async (req, res) => {
                       blockData.account !==
                       "GA6IW2JOWMP4WGI6LYAZ76ZPMFQSJAX4YLJLOQOWFC5VF5C6IGNV2IW7"
                     ) {
-                      let ownerBalance =
-                        parseInt(owner.toJSON().balance) -
-                        parseInt(blockData.params.amount);
+                      let ownerBalance = parseInt(owner.toJSON().balance)-parseInt(blockData.params.amount);
                       owner.set("balance", ownerBalance);
                     }
+                    ownerUserId = owner.toJSON().objectId;
                     owner.set("sequence", parseInt(blockData.sequence));
-                    owner.set("lastTransaction", new Date(res.block.header.time));
+                    owner.set("lastTransaction", new Date(timeBlock));
                     await owner.save().then(async result1 => {
                       const targetUser = new Parse.Query(Users);
                       targetUser.equalTo("publicKey", blockData.params.address);
@@ -173,38 +215,64 @@ exports.SyncDatabase = async (req, res) => {
                         let targetBalance =
                           parseInt(target.toJSON().balance) +
                           parseInt(blockData.params.amount);
+                        targetUserId = target.toJSON().objectId;
                         target.set("balance", targetBalance);
-                        await target.save().then(result2 => {
-                          console.log("done payment");
+                        await target.save().then(async () => {
+                          const newTrans = new Transaction();
+                          newTrans.set(
+                            "amount",
+                            parseInt(blockData.params.amount)
+                          );
+                          newTrans.set("createTime", new Date(timeBlock));
+                          const senderPointer = new Users();
+                          const receiverPointer = new Users();
+                          senderPointer.id = ownerUserId;
+                          receiverPointer.id = targetUserId;
+                          newTrans.set("sender", senderPointer);
+                          newTrans.set("receiver", receiverPointer);
+                          newTrans.set("hashCode", hashCode);
+                          await newTrans
+                            .save()
+                            .then(() => {
+                              contentNotif = "handle payment";
+                              console.log("done payment");
+                            })
+                            .catch(err => {
+                              console.log(err);
+                            });
                         });
                       });
                     });
                   });
                 } //end payment
-                ////////////////////////////Energy
-                /*             if(blockData.account !== "GA6IW2JOWMP4WGI6LYAZ76ZPMFQSJAX4YLJLOQOWFC5VF5C6IGNV2IW7")
-            {
-            let base64Txs = Buffer.from(res.block.data.txs[0], 'base64')
-            let currentBlockTime = res.block_meta.header.time;
-            const engeryUser = new Parse.Query(Users);
-            engeryUser.equalTo("publicKey", blockData.account);
-            await engeryUser.first().then(async (user) => {
-              user.set('energy', calculateEnergy(user.toJSON(), currentBlockTime, base64Txs.length));
-              user.set('bandwidth', currentBlockTime);
-              user.save().then(()=>{
-                console.log('done energy');
-              }).catch(err => {
-                throw new Error(err);
-              })
-            });
-          } */
-                ////////////////////////////End Energy
+              //create Notification 
+              const newNotif = new Notification();
+              newNotif.set('content', contentNotif);
+              newNotif.set('hashCode', hashCode);
+              newNotif.set('createTime', new Date(timeBlock)) ;
+              const ownerUser = new Parse.Query(Users);
+              ownerUser.equalTo("publicKey", blockData.account);
+              await ownerUser.first().then(async user=>{
+                const onwerPointer = new Users();
+                onwerPointer.id = user.id;
+                newNotif.set('user', onwerPointer);
+                await newNotif.save().then(()=>{
+                  console.log('Done create Notification');
+                }).catch(err=>{
+                  console.log(err);
+                });
+              }).catch((err)=>{
+                console.log(err);
+              });//End create Notification
               } // end Loop
             }
           })
           .catch(err => {
             throw new Error(err);
           });
+          indexServerUrl++;
+          if(indexServerUrl === 5)
+          indexServerUrl = 0;
         //Update Current Block
         //await http.get('https://tweet-update-system.glitch.me/update/'+ i);
       } //end Loop container
@@ -220,6 +288,9 @@ exports.decode = async (req, res) => {
   let result = {};
   if (tx) {
     const decodeData = decode(Buffer.from(tx, "base64"));
+    let test = hash(decodeData);
+    res.send(test);
+    res.send(decodeData);
     if (decodeData.operation === "update_account") {
       if (decodeData.params.key === "followings") {
         let result = [];

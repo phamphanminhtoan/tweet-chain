@@ -2,7 +2,7 @@
 const initStateMessage = {
   isAuthenticated: false,
   error: false,
-  user: {}
+  user: {},
 };
 
 const App = (state = initStateMessage, action) => {
