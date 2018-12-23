@@ -115,7 +115,6 @@ function encode(tx) {
   });
 }
 
-<<<<<<< HEAD
 function decodeFollow(tx) {
   return Followings.decode(tx)
 }
@@ -125,12 +124,6 @@ function decodePost(tx) {
 }
 
 
-=======
-function decodePost(data){
-  return PlainTextContent.decode(data)
-}
-
->>>>>>> Toan
 function decode(data) {
   const tx = Transaction.decode(data);
   if (tx.version !== 1) {
@@ -185,9 +178,6 @@ function decode(data) {
 module.exports = {
   encode,
   decode,
-<<<<<<< HEAD
   decodeFollow,
-=======
->>>>>>> Toan
   decodePost
 };
