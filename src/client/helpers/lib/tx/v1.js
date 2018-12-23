@@ -33,6 +33,11 @@ const Followings = vstruct([
   { name: 'addresses', type: vstruct.VarArray(vstruct.UInt16BE, vstruct.Buffer(35)) },
 ]);
 
+const PlainTextContent = vstruct([
+  { name: 'type', type: vstruct.UInt8 },
+  { name: 'text', type: vstruct.VarString(vstruct.UInt16BE) },
+]);
+
 const UpdateAccountParams = vstruct([
   { name: 'key', type: vstruct.VarString(vstruct.UInt8) },
   { name: 'value', type: vstruct.VarBuffer(vstruct.UInt16BE) },
@@ -75,7 +80,10 @@ function encode(tx) {
       break;
 
     case 'post':
-      params = PostParams.encode(tx.params);
+      params = PostParams.encode({
+        ...tx.params, 
+        content: PlainTextContent.encode(tx.params.content)
+      });
       operation = 3;
       break;
 
