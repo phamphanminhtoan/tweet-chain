@@ -11,8 +11,10 @@ import Login from "../Login";
 import EditProfile from "../EditProfile";
 import Register from "../Register";
 import Test from "../Test";
+import ReduxToastr from 'react-redux-toastr';
 
 import "./style.css";
+import 'react-redux-toastr/lib/css/react-redux-toastr.min.css';
 
 const App = props => {
   return (
@@ -23,6 +25,18 @@ const App = props => {
       >
         <meta name="description" content="Tweet-Chain" />
       </Helmet>
+
+        <div>
+         <ReduxToastr
+            timeOut={4000}
+            newestOnTop={false}
+            preventDuplicates
+            position="top-left"
+            transitionIn="fadeIn"
+            transitionOut="fadeOut"
+            closeOnToastrClick
+          />
+          </div>
       <Header user={window.localStorage.getItem('User')}/>
         <Switch>
           <Route path="/test" component={Test} />

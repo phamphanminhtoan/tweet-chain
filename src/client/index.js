@@ -7,22 +7,21 @@ import { Provider } from "react-redux";
 import { Router } from "react-router-dom";
 import { createStore, applyMiddleware } from "redux";
 import App from "./containers/App";
-import reducers from "./reducers";
+import reducersApp from "./reducers";
 import thunk from "redux-thunk"; //import thunk
-
-
 
 const history = createHistory();
 
-const store = createStore(reducers, applyMiddleware(thunk));
+const store = createStore(reducersApp, applyMiddleware(thunk));
 
 class Application extends React.Component {
   render() {
     return (
       <Provider store={store}>
-          <Router history={history}>
-            <App />
-          </Router>
+        <Router history={history}>
+          <App />
+        </Router>
+
       </Provider>
     );
   }

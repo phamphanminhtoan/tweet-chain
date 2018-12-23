@@ -12,6 +12,7 @@ const { getUser, syncUser } = require("../controllers/user");
 const { getListPost } = require("../controllers/post");
 const { getListTrans } = require("../controllers/transaction");
 const { getListNotification } = require("../controllers/notifcation");
+const { getListFollow } = require("../controllers/following");
 
 router.route("/test").get(test);
 
@@ -37,6 +38,9 @@ router.route("/transaction/get-list/:publicKey").get(getListTrans);
 
 //Notification
 router.route("/notification/get-list/:publicKey").get(getListNotification);
+
+//Folowing
+router.route("/followings/get-list/:publicKey").get(getListFollow);
 
 
 module.exports = router;

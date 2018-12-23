@@ -3,18 +3,19 @@ import moment from 'moment';
 import PostComment from '../PostComment';
 
 const PostContent = (props) => {
-    const { post, user} = props;
+    const { post } = props;
+    const user = JSON.parse(window.localStorage.getItem('User'));
     return ( 
         <div className="post-content">
         {/*Post Date*/}
         <div className="post-date hidden-xs hidden-sm">
-          <h5>{user.name}</h5>
-          <p className="text-grey">{moment(post.createTime).format('LL')}</p>
+          <h5>{post.user.name}</h5>
+          <p className="text-grey">{moment(post.createTime.iso).format('LL')}</p>
         </div>
         {/*Post Date End*/} 
         <div className="post-container">
           <img
-            src={user.picture}
+            src={post.user.picture}
             alt="user"
             className="profile-photo-md pull-left"
           />
@@ -22,11 +23,11 @@ const PostContent = (props) => {
             <div className="user-info">
               <h5>
                 <a href="timeline.html" className="profile-link">
-                  {user.name}
+                  {post.user.name}
                 </a>
               </h5>
               <p className="text-muted">
-                {moment(post.createTime).fromNow()}
+                {moment(post.createTime.iso).fromNow()}
               </p>
             </div>
             <div className="reaction">
@@ -49,7 +50,7 @@ const PostContent = (props) => {
             ))} */}
             <div className="post-comment">
               <img
-                src={user.name}
+                src={user.picture}
                 alt=""
                 className="profile-photo-sm"
               />

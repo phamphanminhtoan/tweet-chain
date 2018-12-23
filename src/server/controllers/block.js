@@ -5,7 +5,12 @@ var _ = require("lodash");
 var moment = require("moment");
 var http = require("http-https");
 
-const { encode, sign, decode, hash } = require("../../client/helpers/lib/tx/index");
+const {
+  encode,
+  sign,
+  decode,
+  hash
+} = require("../../client/helpers/lib/tx/index");
 const { decodeFollow, decodePost } = require("../../client/helpers/lib/tx/v1");
 const { calculateEnergy } = require("../../client/helpers/lib/energy");
 const base32 = require("base32.js");
@@ -17,8 +22,7 @@ let serverBlockUrl = [
   "https://gorilla.forest.network/",
   "https://fox.forest.network/"
 ];
-let current = 3553;
-let indexServerUrl = 0;
+let current = 12184;
 exports.SyncDatabase = async (req, res) => {
   const params = req.body ? req.body : req.query;
   //Loop from #1 to #lastest Block
@@ -31,8 +35,8 @@ exports.SyncDatabase = async (req, res) => {
     const Transaction = Parse.Object.extend("Transaction");
     const Notification = Parse.Object.extend("Notification");
     const querySystem = new Parse.Query(System);
-    let contentNotif = '';
-    querySystem.equalTo("objectId", "grAZBFQi8n");
+    let contentNotif = "";
+    querySystem.equalTo("objectId", "1C1Jap5GaI");
     await querySystem.first().then(async system => {
       //Loop from #1 block to #lastest Block
       console.log("run");
@@ -41,21 +45,28 @@ exports.SyncDatabase = async (req, res) => {
       console.log(systemJSON.lastestBlock);
       for (let i = current; i <= 14000; i++) {
         current = i;
-        await axios
-          .get("https://komodo.forest.network/" + "block?height=" + i, {
-            jsonrpc: "2.0"
-          })
+        await client
+          .block({ height: i })
           .then(async res => {
-            let txs = res.data.result.block.data.txs; 
-            let timeBlock = res.data.result.block.header.time;
+            let txs = res.block.data.txs;
+            let timeBlock = res.block.header.time;
             console.log(i);
             if (txs) {
               for (let j = 0; j < txs.length; j++) {
+                let promise = [];
                 let blockData = decode(Buffer.from(txs[j], "base64"));
-                let hashCode = hash(blockData);
+                let hashCode = '';
+                try{
+                  hashCode = hash(blockData);
+                }catch(err){
+                  console.log('Error Hash');
+                  hashCode = '';
+                }
                 console.log(blockData.operation);
                 console.log("------------");
+                ///////////////////////////////////////////
                 if (blockData.operation === "create_account") {
+                  let promise = [];
                   const newUsers = new Users();
                   newUsers.publicKey = blockData.params.address;
                   newUsers.set("publicKey", blockData.params.address);
@@ -63,16 +74,23 @@ exports.SyncDatabase = async (req, res) => {
                   newUsers.set("sequence", 0);
                   newUsers.set("createTime", new Date(timeBlock));
                   //Save New user
-                  await newUsers.save().then(
-                    result => {
+                  promise.push(newUsers.save());
+                  const owerUser = new Parse.Query(Users);
+                  owerUser.equalTo("publicKey", blockData.account);
+                  await owerUser
+                    .first()
+                    .then(async user => {
+                      user.set("sequence", blockData.sequence);
+                      user.set("lastTransaction", new Date(timeBlock));
+                      promise.push(user.save());
                       contentNotif = "Create user";
                       console.log("done create");
-                    },
-                    error => {
-                      console.log(error);
-                    }
-                  );
-                } //end create_account  
+                    })
+                    .catch(err => {
+                      console.log(err);
+                    });
+                } //end create_account
+                ///////////////////////////////////////////
                 if (blockData.operation === "update_account") {
                   const queryUsers = new Parse.Query(Users);
                   if (blockData.params.key === "name") {
@@ -85,10 +103,9 @@ exports.SyncDatabase = async (req, res) => {
                         );
                         user.set("sequence", blockData.sequence);
                         user.set("lastTransaction", new Date(timeBlock));
-                        await user.save().then(response => {
-                          contentNotif = "Update name";
-                          console.log("done update name");
-                        });
+                        console.log("done update name");
+                        contentNotif = "Update name";
+                        promise.push(user.save());
                       },
                       error => {
                         console.log(error);
@@ -97,23 +114,22 @@ exports.SyncDatabase = async (req, res) => {
                   }
                   if (blockData.params.key === "picture") {
                     queryUsers.equalTo("publicKey", blockData.account);
-                    await queryUsers.first().then(
-                      async user => {
+                    await queryUsers
+                      .first()
+                      .then(async user => {
                         let dataImage =
                           "data:image/jpeg;base64," +
                           blockData.params.value.toString("base64");
                         user.set("picture", dataImage);
                         user.set("sequence", blockData.sequence);
                         user.set("lastTransaction", new Date(timeBlock));
-                        await user.save().then(response => {
-                          contentNotif = "Update Avatar";
-                          console.log("done update picture");
-                        });
-                      },
-                      error => {
+                        contentNotif = "Update Avatar";
+                        console.log("done update picture");
+                        promise.push(user.save());
+                      })
+                      .catch(error => {
                         console.log(error);
-                      }
-                    );
+                      });
                   }
                   if (blockData.params.key === "followings") {
                     let result = [];
@@ -124,20 +140,19 @@ exports.SyncDatabase = async (req, res) => {
                         result.push(base32.encode(addresses[i]));
                       }
                       queryUsers.equalTo("publicKey", blockData.account);
-                      await queryUsers.first().then(
-                        async user => {
+                      await queryUsers
+                        .first()
+                        .then(async user => {
                           user.set("followings", result);
                           user.set("sequence", blockData.sequence);
                           user.set("lastTransaction", new Date(timeBlock));
-                          await user.save().then(response => {
-                            contentNotif = "Update Followings";
-                            console.log("done update followings");
-                          });
-                        },
-                        error => {
+                          contentNotif = "Update Followings";
+                          console.log("done update followings");
+                          promise.push(user.save());
+                        })
+                        .catch(error => {
                           console.log(error);
-                        }
-                      );
+                        });
                     } catch (error) {
                       console.log(error);
                       const ownerUser = new Parse.Query(Users);
@@ -145,13 +160,13 @@ exports.SyncDatabase = async (req, res) => {
                       await ownerUser.first().then(async owner => {
                         owner.set("sequence", blockData.sequence);
                         owner.set("lastTransaction", new Date(timeBlock));
-                        await owner.save().then(() => {
-                          console.log("done update Sequence");
-                        });
+                        console.log("done update Sequence");
+                        promise.push(owner.save());
                       });
                     }
                   }
                 } // end update_account
+                ///////////////////////////////////////////
                 if (blockData.operation === "post") {
                   try {
                     let content = decodePost(blockData.params.content);
@@ -166,17 +181,15 @@ exports.SyncDatabase = async (req, res) => {
                       post.set("type", parseInt(content.type));
                       post.set("createTime", new Date(timeBlock));
                       post.set("hashCode", hashCode);
-                      await post.save().then(async result => {
-                        const ownerUser = new Parse.Query(Users);
-                        ownerUser.equalTo("publicKey", blockData.account);
-                        await ownerUser.first().then(async owner => {
-                          owner.set("sequence", blockData.sequence);
-                          owner.set("lastTransaction", new Date(timeBlock));
-                          await owner.save().then(() => {
-                            contentNotif = "Post content";
-                            console.log("done post");
-                          });
-                        });
+                      promise.push(post.save());
+                      const ownerUser = new Parse.Query(Users);
+                      ownerUser.equalTo("publicKey", blockData.account);
+                      await ownerUser.first().then(async owner => {
+                        owner.set("sequence", blockData.sequence);
+                        owner.set("lastTransaction", new Date(timeBlock));
+                        promise.push(owner.save());
+                        contentNotif = "Post content";
+                        console.log("done post");
                       });
                     });
                   } catch (err) {
@@ -186,14 +199,14 @@ exports.SyncDatabase = async (req, res) => {
                     await ownerUser.first().then(async owner => {
                       owner.set("sequence", blockData.sequence);
                       owner.set("lastTransaction", new Date(timeBlock));
-                      await owner.save().then(() => {
-                        contentNotif = "Post content fail";
-                        console.log("done update Sequence");
-                      });
+                      console.log("done update Sequence");
+                      promise.push(owner.save());
                     });
                   }
                 } //end post
+                ///////////////////////////////////////////
                 if (blockData.operation === "payment") {
+                  let promise = [];
                   let ownerUserId, targetUserId;
                   const ownerUser = new Parse.Query(Users);
                   ownerUser.equalTo("publicKey", blockData.account);
@@ -202,77 +215,87 @@ exports.SyncDatabase = async (req, res) => {
                       blockData.account !==
                       "GA6IW2JOWMP4WGI6LYAZ76ZPMFQSJAX4YLJLOQOWFC5VF5C6IGNV2IW7"
                     ) {
-                      let ownerBalance = parseInt(owner.toJSON().balance)-parseInt(blockData.params.amount);
+                      let ownerBalance =
+                        parseInt(owner.toJSON().balance) -
+                        parseInt(blockData.params.amount);
                       owner.set("balance", ownerBalance);
                     }
                     ownerUserId = owner.toJSON().objectId;
                     owner.set("sequence", parseInt(blockData.sequence));
                     owner.set("lastTransaction", new Date(timeBlock));
-                    await owner.save().then(async result1 => {
-                      const targetUser = new Parse.Query(Users);
-                      targetUser.equalTo("publicKey", blockData.params.address);
-                      await targetUser.first().then(async target => {
+                    promise.push(owner.save());
+                    const targetUser = new Parse.Query(Users);
+                    targetUser.equalTo("publicKey", blockData.params.address);
+                    await targetUser
+                      .first()
+                      .then(async target => {
                         let targetBalance =
                           parseInt(target.toJSON().balance) +
                           parseInt(blockData.params.amount);
                         targetUserId = target.toJSON().objectId;
                         target.set("balance", targetBalance);
-                        await target.save().then(async () => {
-                          const newTrans = new Transaction();
-                          newTrans.set(
-                            "amount",
-                            parseInt(blockData.params.amount)
-                          );
-                          newTrans.set("createTime", new Date(timeBlock));
-                          const senderPointer = new Users();
-                          const receiverPointer = new Users();
-                          senderPointer.id = ownerUserId;
-                          receiverPointer.id = targetUserId;
-                          newTrans.set("sender", senderPointer);
-                          newTrans.set("receiver", receiverPointer);
-                          newTrans.set("hashCode", hashCode);
-                          await newTrans
-                            .save()
-                            .then(() => {
-                              contentNotif = "handle payment";
-                              console.log("done payment");
-                            })
-                            .catch(err => {
-                              console.log(err);
-                            });
-                        });
+                        promise.push(target.save());
+                        const newTrans = new Transaction();
+                        newTrans.set(
+                          "amount",
+                          parseInt(blockData.params.amount)
+                        );
+                        newTrans.set("createTime", new Date(timeBlock));
+                        const senderPointer = new Users();
+                        const receiverPointer = new Users();
+                        senderPointer.id = ownerUserId;
+                        receiverPointer.id = targetUserId;
+                        newTrans.set("sender", senderPointer);
+                        newTrans.set("receiver", receiverPointer);
+                        newTrans.set("hashCode", hashCode);
+                        promise.push(newTrans.save());
+                        contentNotif = "handle payment";
+                        console.log("done payment");
+                      })
+                      .catch(err => {
+                        console.log(err);
                       });
-                    });
                   });
                 } //end payment
-              //create Notification 
-              const newNotif = new Notification();
-              newNotif.set('content', contentNotif);
-              newNotif.set('hashCode', hashCode);
-              newNotif.set('createTime', new Date(timeBlock)) ;
-              const ownerUser = new Parse.Query(Users);
-              ownerUser.equalTo("publicKey", blockData.account);
-              await ownerUser.first().then(async user=>{
-                const onwerPointer = new Users();
-                onwerPointer.id = user.id;
-                newNotif.set('user', onwerPointer);
-                await newNotif.save().then(()=>{
-                  console.log('Done create Notification');
-                }).catch(err=>{
-                  console.log(err);
-                });
-              }).catch((err)=>{
-                console.log(err);
-              });//End create Notification
+                if(blockData.operation === "interact"){
+                  await http.get('https://tweet-update-system.glitch.me/update/'+ i);
+                }
+                ///////////////////////////////////////////
+                //create Notification
+                const newNotif = new Notification();
+                newNotif.set("content", contentNotif);
+                newNotif.set("hashCode", hashCode);
+                newNotif.set("createTime", new Date(timeBlock));
+                const ownerUser = new Parse.Query(Users);
+                ownerUser.equalTo("publicKey", blockData.account);
+                await ownerUser
+                  .first()
+                  .then(async user => {
+                    const onwerPointer = new Users();
+                    onwerPointer.id = user.id;
+                    newNotif.set("user", onwerPointer);
+                    console.log("Done create Notification");
+                    promise.push(newNotif.save());
+                  })
+                  .catch(err => {
+                    console.log(err);
+                  }); //End create Notification
+                ///////////////////////////////////////////
+                await Promise.all(promise)
+                  .then(() => {
+                    console.log("Promise Done");
+                  })
+                  .catch(err => {
+                    console.log(err);
+                  });
               } // end Loop
             }
           })
           .catch(err => {
             throw new Error(err);
           });
-          indexServerUrl++;
-          if(indexServerUrl === 5)
-          indexServerUrl = 0;
+        indexServerUrl++;
+        if (indexServerUrl === 5) indexServerUrl = 0;
         //Update Current Block
         //await http.get('https://tweet-update-system.glitch.me/update/'+ i);
       } //end Loop container
@@ -288,9 +311,8 @@ exports.decode = async (req, res) => {
   let result = {};
   if (tx) {
     const decodeData = decode(Buffer.from(tx, "base64"));
-    let test = hash(decodeData);
+    let test = hash(decodeData.params);
     res.send(test);
-    res.send(decodeData);
     if (decodeData.operation === "update_account") {
       if (decodeData.params.key === "followings") {
         let result = [];

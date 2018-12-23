@@ -2,6 +2,7 @@
 const initStateMessage = {
   isAuthenticated: false,
   error: false,
+  message: '',
   user: {},
 };
 
@@ -24,7 +25,8 @@ const App = (state = initStateMessage, action) => {
       return {
         ...state,
         isAuthenticated: false,
-        error: true
+        error: true,
+        message: action.message
       };
     default:
       return state;
