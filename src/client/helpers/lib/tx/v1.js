@@ -39,11 +39,6 @@ const UpdateAccountParams = vstruct([
   { name: 'value', type: vstruct.VarBuffer(vstruct.UInt16BE) },
 ]);
 
-const PlainTextContent = vstruct([
-  { name: 'type', type: vstruct.UInt8 },
-  { name: 'text', type: vstruct.VarString(vstruct.UInt16BE) },
-]);
-
 const InteractParams = vstruct([
   // Post or comment (or something else?)
   { name: 'object', type: vstruct.Buffer(32) },
