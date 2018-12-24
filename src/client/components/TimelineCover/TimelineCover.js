@@ -28,19 +28,25 @@ const ProfileBanner = props => {
             <div className="col-md-9">
               <ul className="list-inline profile-menu">
                 <li>
-                  <a to="#" className="active">
+                  <a to="#" onClick={()=>{
+                    props.OpenTimeline();
+                  }} className={props.Open === "Timeline" ? "active": ""}>
                     TimeLine
                   </a>
                 </li>
                 <li>
-                  <a href="#" onClick={props.handleOpenModal}>Followings</a>
+                  <a href="#" className={props.Open === "Follow" ? "active": ""} onClick={()=>{
+                    props.openfollow();
+                  }}>Followings</a>
                 </li>
                 <li>
-                  <a to="#">Transaction</a>
+                  <a href="#" className={props.Open === "Payment" ? "active": ""} onClick={()=>{
+                    props.openPayment();
+                  }}>Payment</a>
                 </li>
               </ul>
               <ul className="follow-me list-inline">
-                <li>{props.user.followingPeople} people following</li>
+                <li>{props.user.name} is following {props.countFollow} people</li>
                 <li>
                   <button className="btn-primary">Follow</button>
                 </li>

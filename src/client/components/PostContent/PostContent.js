@@ -15,15 +15,15 @@ const PostContent = (props) => {
         {/*Post Date End*/} 
         <div className="post-container">
           <img
-            src={post.user.picture}
+            src={post.user.picture ? post.user.picture : "https://www.lewesac.co.uk/wp-content/uploads/2017/12/default-avatar.jpg" }
             alt="user"
             className="profile-photo-md pull-left"
           />
           <div className="post-detail">
             <div className="user-info">
               <h5>
-                <a href="timeline.html" className="profile-link">
-                  {post.user.name}
+                <a href={"/profile/"+post.user.publicKey} className="profile-link">
+                  {post.user.name ? post.user.name : "NoName"}
                 </a>
               </h5>
               <p className="text-muted">

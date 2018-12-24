@@ -20,6 +20,20 @@ const initStateListFollowings = {
     message: ''
 };
 
+const initStateListNotification = {
+  listNotification: [],
+  isFetching: false,
+  error: false,
+  message: ''
+};
+
+const initStateListPayment = {
+  listPayment: [],
+  isFetching: false,
+  error: false,
+  message: ''
+};
+
 export const userState = (state = initStateUser, action) => {
   switch (action.type) {
     case "FETCHING_USER":
@@ -93,6 +107,62 @@ export const listFollowingsState = (state = initStateListFollowings, action) => 
           error: false
         };
       case "FETCHING_LIST_FOLLOWINGS_FAILURE":
+        return {
+          ...state,
+          isFetching: false,
+          error: true,
+          message: action.message
+        };
+      default:
+        return state;
+    }
+  };
+
+  export const listNotificationState = (state = initStateListNotification, action) => {
+    switch (action.type) {
+      case "FETCHING_LIST_NOTIFICATION":
+        return {
+          ...state,
+          listNotification: [],
+          isFetching: true,
+          error: false
+        };
+      case "FETCHING_LIST_NOTIFICATION_SUCCESS":
+        return {
+          ...state,
+          listNotification: state.listNotification.concat(action.notification),
+          isFetching: false,
+          error: false
+        };
+      case "FETCHING_LIST_NOTIFICATION_FAILURE":
+        return {
+          ...state,
+          isFetching: false,
+          error: true,
+          message: action.message
+        };
+      default:
+        return state;
+    }
+  };
+
+  export const listPaymentState = (state = initStateListPayment, action) => {
+    switch (action.type) {
+      case "FETCHING_PAYMENT":
+        return {
+          ...state,
+          listPayment: [],
+          isFetching: true,
+          error: false
+        };
+      case "FETCHING_PAYMENT_SUCCESS":
+        return {
+          ...state,
+          listPayment: state.listPayment.concat(action.payment),
+          isFetching: false,
+          error: false
+        };
+      case "FETCHING_PAYMENT_FAILURE":
         return {
           ...state,
           isFetching: false,

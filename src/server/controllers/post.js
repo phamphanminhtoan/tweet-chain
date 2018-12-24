@@ -1,6 +1,5 @@
 //This is Template for Controller
 exports.getListPost = async (req, res) => {
-  console.log("voa");
   const params = req.body ? req.body : req.query;
   try {
     //TODO
@@ -16,7 +15,7 @@ exports.getListPost = async (req, res) => {
     await queryUser
       .first()
       .then(async user => {
-        if (!user) throw new Error("User is undefined");
+        if (!user) throw new Error("Cannot find this user");
 
         userPointer.id = user.id;
         queryPost.equalTo("user", userPointer);
@@ -26,19 +25,20 @@ exports.getListPost = async (req, res) => {
         await queryPost
           .find()
           .then(result => {
-            if (!result) throw new Error("Posts is undefined");
-
+            if (result.length === 0) {
+              throw new Error("No Posts");
+            }
             res.send(result);
           })
           .catch(err => {
-            throw new Error(err);
+            throw new Error(err.message);
           });
       })
       .catch(err => {
-        throw new Error(err);
+        throw new Error(err.message);
       });
   } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
+    console.log(error.message);
+    res.status(404).send(error.message);
   }
 };

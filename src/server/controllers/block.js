@@ -311,8 +311,7 @@ exports.decode = async (req, res) => {
   let result = {};
   if (tx) {
     const decodeData = decode(Buffer.from(tx, "base64"));
-    let test = hash(decodeData.params);
-    res.send(test);
+
     if (decodeData.operation === "update_account") {
       if (decodeData.params.key === "followings") {
         let result = [];

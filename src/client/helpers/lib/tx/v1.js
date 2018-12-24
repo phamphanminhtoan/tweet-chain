@@ -112,11 +112,11 @@ function encode(tx) {
 }
 
 function decodeFollow(tx) {
-  return Followings.decode(tx)
+  return Followings.decode(tx);
 }
 
 function decodePost(tx) {
-  return PlainTextContent.decode(tx)
+  return PlainTextContent.decode(tx);
 }
 
 

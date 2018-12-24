@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import TimelineCover from "../../components/TimelineCover";
 import PostBox from "../../components/PostBox";
 import "./style.css";
@@ -7,10 +7,18 @@ import Activities from "../../components/Activites";
 //Redux
 import { connect } from "react-redux";
 import { withRouter } from "react-router";
-import { fetchListPost, fetchListFollowings, fetchUser } from "./action";
+import {
+  fetchListPost,
+  fetchListFollowings,
+  fetchUser,
+  fetchNotification,
+  fetchPayment
+} from "./action";
 //Modal
-import Modal from "react-modal";
+import FollowingsComponent from "../../components/Followings";
+import PaymentComponent from "../../components/Payment";
 import { toastr } from "react-redux-toastr";
+
 
 const customStyles = {
   content: {
@@ -23,95 +31,127 @@ const customStyles = {
   }
 };
 
-class Profile extends React.Component {
+class Profile extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      modalIsOpen: false
+      Open: "Timeline"
     };
   }
-  openModal = () => {
-    this.setState({ modalIsOpen: true });
+  openfollow = () => {
+    this.setState({ Open: "Follow" });
   };
 
-  afterOpenModal = () => {
-    // references are now sync'd and can be accessed.
-    this.subtitle.style.color = "#f00";
+  openPayment = () => {
+    this.setState({ Open: "Payment" });
   };
 
-  closeModal = () => {
-    this.setState({ modalIsOpen: false });
+  OpenTimeline = () => {
+    this.setState({ Open: "Timeline" });
   };
 
-  componentDidMount = async ()=>{;
-    if(this.props.match.params.publicKey !== undefined)
-    {
-      await this.props.fetchUser(this.props.match.params.publicKey);
-      await this.props.fetchListPost(this.props.match.params.publicKey);
-    }
-
-    else
-    {
+  componentWillMount = async () => {
+    let promise = [];
+    if (this.props.match.params.publicKey !== undefined) {
+      promise.push(this.props.fetchUser(this.props.match.params.publicKey));
+      promise.push(this.props.fetchListPost(this.props.match.params.publicKey));
+      promise.push(
+        this.props.fetchNotification(this.props.match.params.publicKey)
+      );
+      promise.push(
+        this.props.fetchListFollowings(this.props.match.params.publicKey)
+      );
+      promise.push(
+        this.props.fetchPayment(this.props.match.params.publicKey)
+      );
+    } else {
       const user = JSON.parse(window.localStorage.getItem("User"));
-      await this.props.fetchUser(user.publicKey);
-      await this.props.fetchListPost(this.props.match.params.publicKey);
+      promise.push(this.props.fetchUser(user.publicKey));
+      promise.push(this.props.fetchListPost(user.publicKey));
+      promise.push(this.props.fetchNotification(user.publicKey));
+      promise.push(this.props.fetchListFollowings(user.publicKey));
+      promise.push(this.props.fetchPayment(user.publicKey));
     }
+    await Promise.all(promise);
+  };
 
-  }
   render() {
+    const { post, notification, followings, userProfile } = this.props;
     let ownerFlag = true;
-    let user = this.props.user;
-    if (this.props.match) {   
+    let ownerUser = JSON.parse(window.localStorage.getItem("User"));
+    if (this.props.match) {
       ownerFlag = false;
-    } else {    
+    } else {
       ownerFlag = true;
     }
-    console.log(this.props.post);
+    if (
+      notification.isFetching ||
+      post.isFetching ||
+      userProfile.isFetching ||
+      followings.isFetching
+    )
+      toastr.info("TweetChain", "Loading");
     return (
       <div className="timeline">
-        <TimelineCover user={user} handleOpenModal={this.openModal} />
+        <TimelineCover
+          user={userProfile.user}
+          handleOpenModal={this.openModal}
+          countFollow={followings.listFollowings.length}
+          follow={this.props.followings}
+          openfollow={this.openfollow}
+          OpenTimeline={this.OpenTimeline}
+          openPayment={this.openPayment}
+          Open={this.state.Open}
+        />
         <div id="page-contents">
           <div className="row">
             <div className="col-md-3" />
             <div className="col-md-7">
-              <PostBox user={user} />
-              {this.props.post ? this.props.post.map((e,index)=>(
-                  <PostContent user={user} post={e} key={index} />
-              )): <div />}
+              {this.state.Open === "Timeline" ? (
+                <Fragment>
+                  {ownerUser.publicKey === userProfile.user.publicKey ? (
+                    <PostBox user={userProfile} />
+                  ) : (
+                    <div />
+                  )}
+                  {!post.error ? (
+                    post.listPost.map((e, index) => (
+                      <PostContent
+                        user={userProfile.user}
+                        post={e}
+                        key={index}
+                      />
+                    ))
+                  ) : (
+                    <p>Empty.</p>
+                  )}
+                </Fragment>
+              ) : (
+                <div />
+              )}
+              {this.state.Open === "Follow" ? (
+                <FollowingsComponent
+                  followings={this.props.followings.listFollowings}
+                />
+              ) : (
+                <div />
+              )}
+              {this.state.Open === "Payment" ? (
+                <PaymentComponent payment={this.props.payment.listPayment} />
+              ) : (
+                <div />
+              )}
             </div>
             <div className="col-md-2 static">
               <div id="sticky-sidebar">
                 <h4 className="grey">Activity</h4>
-{/*                 {tempActivities.map((activities, index) => (
-                  <Activities
-                    activities={activities}
-                    user={tempData}
-                    key={index}
-                  />
-                ))} */}
-                <Modal
-                  isOpen={this.state.modalIsOpen}
-                  onAfterOpen={this.afterOpenModal}
-                  onRequestClose={this.closeModal}
-                  style={customStyles}
-                  contentLabel="Example Modal"
-                >
-                  <h2 ref={subtitle => (this.subtitle = subtitle)}>
-                    List followings
-                  </h2>
-                  <hr />
-                  <div>I am a modal</div>
-                  <hr />
-                  <button className="btn btn-danger" onClick={this.closeModal}>
-                    close
-                  </button>
-                </Modal>
-                <button
-                  onClick={() => toastr.success("The title", "The message")}
-                  type="button"
-                >
-                  Toastr Success
-                </button>
+                {!notification.error ? (
+                  notification.listNotification.map((activities, index) => (
+                    <Activities activities={activities} key={index} />
+                  ))
+                ) : (
+                  <p>Empty.</p>
+                )}
               </div>
             </div>
           </div>
@@ -122,19 +162,19 @@ class Profile extends React.Component {
 }
 
 const mapStateToProps = state => ({
-  post: state.listPostState.listPost,
-  followings: state.listFollowingsState.listFollowings,
-  user: state.userState.user,
-  isFetchingPost: state.listPostState.isFetching,
-  isFetchingFollowings: state.listFollowingsState.isFetching,
-  errorPost: state.listPostState.error,
-  errorFollowings: state.listFollowingsState.error
+  post: state.listPostState,
+  followings: state.listFollowingsState,
+  userProfile: state.userState,
+  notification: state.listNotificationState,
+  payment: state.listPaymentState
 });
 
 const mapDispatchToProps = dispatch => ({
   fetchListPost: publicKey => dispatch(fetchListPost(publicKey)),
   fetchListFollowings: publicKey => dispatch(fetchListFollowings(publicKey)),
-  fetchUser: publicKey => dispatch(fetchUser(publicKey))
+  fetchUser: publicKey => dispatch(fetchUser(publicKey)),
+  fetchNotification: publicKey => dispatch(fetchNotification(publicKey)),
+  fetchPayment: publicKey => dispatch(fetchPayment(publicKey))
 });
 
 export default withRouter(
