@@ -5,17 +5,17 @@ const PostBox = props => {
     <Fragment>
       <div className="create-post">
         <div className="row">
-          <div className="col-md-7 col-sm-7">
+          <div className="col-md-10 col-sm-10">
             <div className="form-group">
               <img
-                src={props.user.avatarUrl}
+                src={props.user.picture}
                 alt=""
                 className="profile-photo-md"
               />
               <textarea
                 name="texts"
                 id="exampleTextarea"
-                cols={30}
+                cols={100}
                 rows={1}
                 className="form-control"
                 placeholder="Write what you wish"
@@ -23,30 +23,8 @@ const PostBox = props => {
               />
             </div>
           </div>
-          <div className="col-md-5 col-sm-5">
+          <div className="col-md-2 col-sm-2">
             <div className="tools">
-              <ul className="publishing-tools list-inline">
-                <li>
-                  <a href="/">
-                    <i className="fa fa-compose" />
-                  </a>
-                </li>
-                <li>
-                  <a href="/">
-                    <i className="fa fa-images" />
-                  </a>
-                </li>
-                <li>
-                  <a href="/">
-                    <i className="fa fa-ios-videocam" />
-                  </a>
-                </li>
-                <li>
-                  <a href="/">
-                    <i className="fa fa-map" />
-                  </a>
-                </li>
-              </ul>
               <button className="btn btn-primary pull-right">Publish</button>
             </div>
           </div>

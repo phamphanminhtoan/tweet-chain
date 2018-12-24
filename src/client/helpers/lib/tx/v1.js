@@ -33,10 +33,6 @@ const Followings = vstruct([
   { name: 'addresses', type: vstruct.VarArray(vstruct.UInt16BE, vstruct.Buffer(35)) },
 ]);
 
-const PlainTextContent = vstruct([
-  { name: 'type', type: vstruct.UInt8 },
-  { name: 'text', type: vstruct.VarString(vstruct.UInt16BE) },
-]);
 
 const UpdateAccountParams = vstruct([
   { name: 'key', type: vstruct.VarString(vstruct.UInt8) },

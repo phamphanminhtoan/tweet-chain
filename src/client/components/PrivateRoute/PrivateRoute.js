@@ -3,12 +3,14 @@ import { Route, Redirect } from "react-router-dom";
 import { connect } from "react-redux";
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
-  console.log(rest.isAuthenticated);
+  let auth=false;
+  if(window.localStorage.getItem('User'))
+  auth = true;
   return (
     <Route
       {...rest}
       render={propser =>
-        rest.isAuthenticated ? (
+        auth ? (
           <Component {...propser} />
         ) : (
           <Redirect
@@ -24,7 +26,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
 };
 
 const mapStateToProps = state => ({
-  isAuthenticated: state.App.isAuthenticated
+  isAuthenticated: state.App.isAuthenticated,
 });
 
 const mapDispatchToProps = dispatch => ({

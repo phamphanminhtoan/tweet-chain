@@ -6,7 +6,7 @@ const ProfileBanner = props => {
       <div
         className="timeline-cover"
         style={{
-          background: "url(" + props.user.coverUrl + ") no-repeat",
+          background: "url('../images/banner.jpg') no-repeat",
           backgroundPosition: "center",
           backgroundSize: "cover"
         }}
@@ -17,35 +17,32 @@ const ProfileBanner = props => {
             <div className="col-md-3">
               <div className="profile-info">
                 <img
-                  src={props.user.avatarUrl}
+                  src={props.user.picture}
                   alt=""
                   className="img-responsive profile-photo"
                 />
-                <h3>{props.user.fullName}</h3>
-                <p className="text-muted">{props.user.address}</p>
+                <h3>{props.user.name}</h3>
+                <p className="text-muted">TweetChainer</p>
               </div>
             </div>
             <div className="col-md-9">
               <ul className="list-inline profile-menu">
                 <li>
-                  <a to="/" className="active">
-                    Timeline
+                  <a to="#" className="active">
+                    TimeLine
                   </a>
                 </li>
                 <li>
-                  <a to="/about">About</a>
+                  <a href="#" onClick={props.handleOpenModal}>Followings</a>
                 </li>
                 <li>
-                  <a href="timeline-album.html">Album</a>
-                </li>
-                <li>
-                  <a href="timeline-friends.html">Friends</a>
+                  <a to="#">Transaction</a>
                 </li>
               </ul>
               <ul className="follow-me list-inline">
-                <li>{props.user.followingPeople} people following her</li>
+                <li>{props.user.followingPeople} people following</li>
                 <li>
-                  <button className="btn-primary">Add Friend</button>
+                  <button className="btn-primary">Follow</button>
                 </li>
               </ul>
             </div>
@@ -56,31 +53,28 @@ const ProfileBanner = props => {
         <div className="navbar-mobile hidden-lg hidden-md">
           <div className="profile-info">
             <img
-              src={props.user.avatarUrl}
+              src={props.user.picture}
               alt=""
               className="img-responsive profile-photo"
             />
-            <h4>{props.user.fullName}</h4>
-            <p className="text-muted">{props.user.address}</p>
+            <h4>{props.user.name}</h4>
+            <p className="text-muted">TweetChainer</p>
           </div>
           <div className="mobile-menu">
             <ul className="list-inline">
               <li>
-                <a href="timline.html" className="active">
+                <a href="#" className="active">
                   Timeline
                 </a>
               </li>
               <li>
-                <a href="timeline-about.html">About</a>
+                <a href="#" onClick={props.handleOpenModal}>Followings</a>
               </li>
               <li>
-                <a href="timeline-album.html">Album</a>
-              </li>
-              <li>
-                <a href="timeline-friends.html">Friends</a>
+                <a href="timeline-album.html">Transaction</a>
               </li>
             </ul>
-            <button className="btn-primary">Add Friend</button>
+            <button className="btn-primary">Follow</button>
           </div>
         </div>
         {/*Timeline Menu for Small Screens End*/}
