@@ -48,6 +48,11 @@ const InteractParams = vstruct([
   // React if '', like, love, haha, anrgy, sad, wow
 ]);
 
+const PlainTextContent = vstruct([
+  { name: 'type', type: vstruct.UInt8 },
+  { name: 'text', type: vstruct.VarString(vstruct.UInt16BE) },
+]);
+
 function encode(tx) {
   let params, operation;
   if (tx.version !== 1) {
@@ -73,7 +78,7 @@ function encode(tx) {
     case 'post':
       params = PostParams.encode({
         ...tx.params, 
-        content: PlainTextContent.encode(tx.params.content)
+        content: PlainTextContent.encode(tx.params.content),
       });
       operation = 3;
       break;
@@ -84,12 +89,21 @@ function encode(tx) {
       break;
 
     case 'interact':
-      params = InteractParams.encode({
-        ...tx.params,
-        object: Buffer.from(tx.params.object, 'hex'),
-      });
-      operation = 5;
-      break;
+    let content;
+    const type = tx.params.content.type;
+    if (type == 1) {
+      content = PlainTextContent.encode(tx.params.content);
+    }
+    if (type == 2) {
+      content = ReactContent.encode(tx.params.content);
+    }
+    params = InteractParams.encode({
+      ...tx.params,
+      object: Buffer.from(tx.params.object, 'hex'),
+      content: content
+    });
+    operation = 5;
+    break;
 
     default:
       throw Error('Unspport operation');
@@ -114,8 +128,75 @@ function decodePost(tx) {
   return PlainTextContent.decode(tx);
 }
 
+const InteractType = vstruct([
+  {name: 'type', type: vstruct.UInt8}
+]);
+
+const ReactContent = vstruct([
+  { name: 'type', type: vstruct.UInt8 },
+  { name: 'reaction', type: vstruct.UInt8 },
+]);
 
 function decode(data) {
+  const tx = Transaction.decode(data);
+  if (tx.version !== 1) {
+    throw Error('Wrong version');
+  }
+  let operation, params;
+  switch (tx.operation) {
+    case 1:
+      operation = 'create_account';
+      params = CreateAccountParams.decode(tx.params);
+      params.address = base32.encode(params.address);
+      Keypair.fromPublicKey(params.address);
+      break;
+
+    case 2:
+      operation = 'payment';
+      params = PaymentParams.decode(tx.params);
+      params.address = base32.encode(params.address);
+      Keypair.fromPublicKey(params.address);
+      break;
+    
+    case 3:
+      operation = 'post';
+      params = PostParams.decode(tx.params);
+      params.content = PlainTextContent.decode(params.content);
+      break;
+
+    case 4:
+      operation = 'update_account';
+      params = UpdateAccountParams.decode(tx.params);
+      break;
+    
+    case 5:
+      operation = 'interact';
+      params = InteractParams.decode(tx.params);
+      params.object = params.object.toString('hex').toUpperCase();
+      interactType = InteractType.decode(params.content).type
+      if (interactType == 1) {
+        params.content = PlainTextContent.decode(params.content)
+      }
+      if (interactType == 2) {
+        params.content = ReactContent.decode(params.content)
+      }
+      break;
+    
+    default:
+      throw Error('Unspport operation');
+  }
+  return {
+    version: 1,
+    account: base32.encode(tx.account),
+    sequence: tx.sequence,
+    memo: tx.memo,
+    operation,
+    params,
+    signature: tx.signature,
+  };
+}
+
+function decodeforExcept(data) {
   const tx = Transaction.decode(data);
   if (tx.version !== 1) {
     throw Error('Wrong version');
@@ -151,7 +232,7 @@ function decode(data) {
       params = InteractParams.decode(tx.params);
       params.object = params.object.toString('hex').toUpperCase();
       break;
-    
+
     default:
       throw Error('Unspport operation');
   }
@@ -170,5 +251,6 @@ module.exports = {
   encode,
   decode,
   decodeFollow,
-  decodePost
+  decodePost,
+  decodeforExcept
 };

@@ -2,7 +2,6 @@
 exports.getListFollow = async (req, res) => {
   const params = req.body ? req.body : req.query;
   try {
-    console.log('vao roi ne');
     //TODO
     const User = Parse.Object.extend("Users");
 
@@ -16,7 +15,6 @@ exports.getListFollow = async (req, res) => {
         if (!result) throw new Error("User is undefined");
 
         let promise = [];
-        console.log( result.toJSON().followings);
 
         if (result.toJSON().followings !== undefined) {
           let followings = result.toJSON().followings;

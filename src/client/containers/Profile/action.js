@@ -159,3 +159,34 @@ export function fetchPayment(publicKey = "") {
         });
     };
 }
+
+/* export const getInteract = () => ({
+  type: "FETCHING_PAYMENT"
+});
+
+export const getInteractSuccess = Interact => ({
+  type: "FETCHING_PAYMENT_SUCCESS",
+  payment
+});
+
+export const getInteractFailure = (message) => ({
+  type: "FETCHING_PAYMENT_FAILURE",
+  message
+});
+
+export function fetchInteract(publicKey = "") {
+    return async dispatch => {
+      await dispatch(getInteract());
+      await axios({
+        method: "get",
+        url: "/api/interact/get-list/" + publicKey
+      })
+        .then(data => {
+          dispatch(getInteractSuccess(data.data));
+        })
+        .catch(err => {
+          toastr.error(err);
+          dispatch(getInteractFailure(err));
+        });
+    };
+} */

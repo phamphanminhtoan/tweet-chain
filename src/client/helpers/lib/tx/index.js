@@ -28,6 +28,17 @@ function decode(data) {
   }
 }
 
+function decodeForExcept(data) {
+  const versionTx = Transaction.decode(data);
+  switch (versionTx.version) {
+    case 1:
+      return v1.decodeforExcept(data);
+    
+    default:
+      throw Error('Unsupport version');
+  }
+}
+
 function getUnsignedHash(tx) {
   return crypto
     .createHash('sha256')
@@ -57,4 +68,4 @@ function hash(tx) {
     .toUpperCase();
 }
 
-module.exports = { encode, decode, verify, sign, hash, getUnsignedHash };
+module.exports = { encode, decode, verify, sign, hash, getUnsignedHash, decodeForExcept };

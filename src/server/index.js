@@ -29,7 +29,7 @@ app.get('/*', function(req, res) {
 
 //connect to database
 
-Parse.serverURL = 'https://tweetchain-database.glitch.me/api'; // This is your Server URL
+Parse.serverURL = 'http://tweetchain-database.glitch.me/api'; // This is your Server URL
 Parse.initialize(
   '14488a89b90d1701fa0d334fb85fad55eac86824', // This is your Application ID
   '0aa56f45a45838c710c511558c2110a0dde9b578', // This is your Javascript key

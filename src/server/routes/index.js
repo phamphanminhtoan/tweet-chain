@@ -13,6 +13,7 @@ const { getListPost } = require("../controllers/post");
 const { getListTrans } = require("../controllers/transaction");
 const { getListNotification } = require("../controllers/notifcation");
 const { getListFollow } = require("../controllers/following");
+const { getInteract } = require("../controllers/interact");
 
 router.route("/test").get(test);
 
@@ -41,6 +42,9 @@ router.route("/notification/get-list/:publicKey").get(getListNotification);
 
 //Folowing
 router.route("/followings/get-list/:publicKey").get(getListFollow);
+
+//Interact
+router.route("/interact/get-list/:hashPost").get(getInteract);
 
 
 module.exports = router;
