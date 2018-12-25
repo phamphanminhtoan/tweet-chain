@@ -9,7 +9,7 @@ const Footer = props => {
           <div className="footer-wrapper">
             <div className="col-md-3 col-sm-3">
               <a href="/">
-                <img src="images/tc-black.png" alt="" className="footer-logo" />
+                <img src="../images/tc-black.png" alt="" className="footer-logo" />
               </a>
             </div>
             <div className="col-md-2 col-sm-2">

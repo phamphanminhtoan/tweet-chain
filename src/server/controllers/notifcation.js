@@ -2,7 +2,6 @@
 exports.getListNotification = async (req, res) => {
   const params = req.body ? req.body : req.query;
   try {
-    console.log('vao');
     //TODO
     const Notif = Parse.Object.extend("Notification");
     const User = Parse.Object.extend("Users");
@@ -13,7 +12,7 @@ exports.getListNotification = async (req, res) => {
     const userPointer = new User();
 
     queryUser.equalTo("publicKey", req.params.publicKey);
-    queryUser
+    await queryUser
       .first()
       .then(async user => {
         if (!user) throw new Error("User is undefined");
@@ -29,7 +28,6 @@ exports.getListNotification = async (req, res) => {
           .find()
           .then(result => {
             if (result.length === 0) throw new Error("No notification");
-
             res.send(result);
           })
           .catch(err => {
@@ -40,7 +38,7 @@ exports.getListNotification = async (req, res) => {
         throw new Error(err.message);
       });
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     res.status(500).send(error.message);
   }
 };

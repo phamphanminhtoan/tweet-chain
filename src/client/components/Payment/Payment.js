@@ -1,11 +1,10 @@
 import React from "react";
 const Payment = props => {
   const { payment } = props;
-  console.log(payment);
   return (
     <div>
-      {payment ? (
-        payment.map((e, pos) => (
+      {!payment.isFetching ? (!payment.error ? (
+        payment.listPayment.map((e, pos) => (
           <div className="post-content" key={pos}>
             <div className="post-container">
               <img
@@ -56,8 +55,8 @@ const Payment = props => {
             </div>
           </div>
         ))
-      ) : (
-        <div />
+      ): <p>Không có giao dịch chuyển khoản nào.</p> ) : (
+        <center><div className="loader"></div></center>
       )}
     </div>
   );

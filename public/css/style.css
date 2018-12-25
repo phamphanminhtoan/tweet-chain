@@ -1697,32 +1697,10 @@ ul.online-users li span.online-dot{
   overflow: visible;
 }
 
-.timeline .post-content::before{
-  content: "";
-  position: absolute;
-  background: none;
-  width: 1px;
-  height: 98%;
-  left: -145px;
-  border-left: 2px solid #8dc63f;
-  top: 15px;
-}
 
 .timeline .post-content .post-date{
   position: absolute;
   margin-left: -125px;
-}
-
-.timeline .post-content .post-date::before{
-  content: "";
-  background: #8dc63f;
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 10px;
-  left: -30px;
-  top: 10px;
-  border: 2px solid #fff;
 }
 
 .timeline .post-content img.post-image{

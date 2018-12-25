@@ -3,7 +3,7 @@ const Followings = props => {
   const { followings } = props;
   return (
     <div>
-      {followings ? (  followings.map((e,pos)=>(
+      {!followings.isFetching ? ( !followings.error ? (followings.listFollowings.map((e,pos)=>(
         <div className="post-content" key={pos}>
         <div className="post-container">
           <img
@@ -33,8 +33,8 @@ const Followings = props => {
         </div>
       </div>
       )) 
-      ) : (
-        <div />
+      ):<p>Không có danh sách theo dõi.</p>) : (
+        <center><div className="loader"></div></center>
       )}
     </div>
   );

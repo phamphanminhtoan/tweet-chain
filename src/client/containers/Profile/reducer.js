@@ -74,7 +74,7 @@ export const listPostState = (state = initStateListPost, action) => {
     case "FETCHING_LIST_POST_SUCCESS":
       return {
         ...state,
-        listPost: state.listPost.concat(action.listPost),
+        listPost: action.listPost,
         isFetching: false,
         error: false
       };
@@ -102,7 +102,7 @@ export const listFollowingsState = (state = initStateListFollowings, action) => 
       case "FETCHING_LIST_FOLLOWINGS_SUCCESS":
         return {
           ...state,
-          listFollowings: state.listFollowings.concat(action.listFollowings),
+          listFollowings: action.listFollowings,
           isFetching: false,
           error: false
         };
@@ -130,7 +130,7 @@ export const listFollowingsState = (state = initStateListFollowings, action) => 
       case "FETCHING_LIST_NOTIFICATION_SUCCESS":
         return {
           ...state,
-          listNotification: state.listNotification.concat(action.notification),
+          listNotification: action.notification,
           isFetching: false,
           error: false
         };
@@ -158,7 +158,7 @@ export const listFollowingsState = (state = initStateListFollowings, action) => 
       case "FETCHING_PAYMENT_SUCCESS":
         return {
           ...state,
-          listPayment: state.listPayment.concat(action.payment),
+          listPayment: action.payment,
           isFetching: false,
           error: false
         };

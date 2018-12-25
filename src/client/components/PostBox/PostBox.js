@@ -1,6 +1,7 @@
 import React, { Fragment } from "react";
 
 const PostBox = props => {
+  const user = JSON.parse(window.localStorage.getItem("User"));
   return (
     <Fragment>
       <div className="create-post">
@@ -8,7 +9,7 @@ const PostBox = props => {
           <div className="col-md-10 col-sm-10">
             <div className="form-group">
               <img
-                src={props.user.picture}
+                src={user.picture}
                 alt=""
                 className="profile-photo-md"
               />

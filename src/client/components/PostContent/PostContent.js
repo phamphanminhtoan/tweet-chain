@@ -4,15 +4,29 @@ import PostComment from '../PostComment';
 
 const PostContent = (props) => {
     const { post } = props;
+    let like = 0;
+    let love = 0; 
+    let haha = 0;
+    let wow = 0;
+    let sad = 0;
+    let angry = 0;
+    post.reaction.forEach(e=>{
+      if(e.reaction === 1)
+      like++;
+      if(e.reaction === 2)
+      love++;
+      if(e.reaction === 3)
+      haha++;
+      if(e.reaction === 4)
+      wow++;
+      if(e.reaction === 5)
+      wow++;
+      if(e.reaction === 6)
+      angry++;  
+    });
     const user = JSON.parse(window.localStorage.getItem('User'));
     return ( 
         <div className="post-content">
-        {/*Post Date*/}
-        <div className="post-date hidden-xs hidden-sm">
-          <h5>{post.user.name}</h5>
-          <p className="text-grey">{moment(post.createTime.iso).format('LL')}</p>
-        </div>
-        {/*Post Date End*/} 
         <div className="post-container">
           <img
             src={post.user.picture ? post.user.picture : "https://www.lewesac.co.uk/wp-content/uploads/2017/12/default-avatar.jpg" }
@@ -32,11 +46,24 @@ const PostContent = (props) => {
             </div>
             <div className="reaction">
               <a href="/" className="btn text-green">
-                <i className="fa fa-thumbs-up" /> 1
+                <i className="fa fa-thumbs-up" /> {like}
               </a>
-              <a href="/" className="btn text-red">
-                <i className="fa fa-thumbs-down" /> 1
+              <a href="/" className="btn text-green">
+                <i className="fa fa-heart" /> {love}
               </a>
+              <a href="/" className="btn text-green">
+                <i className="fa fa-smile" /> {haha}
+              </a>
+              <a href="/" className="btn text-green">
+                <i className="fa fa-laugh" /> {wow}
+              </a>
+              <a href="/" className="btn text-green">
+                <i className="fa fa-sad-tear" /> {sad}
+              </a>
+              <a href="/" className="btn text-green">
+                <i className="fa fa-angry" /> {angry}
+              </a>
+
             </div>
             <div className="line-divider" />
             <div className="post-text">
@@ -45,9 +72,9 @@ const PostContent = (props) => {
               </p>
             </div>
             <div className="line-divider" />
-{/*             {Post.comments.map((comment, index)=>(
-                <PostComment comment={comment} key={index} />
-            ))} */}
+             {post.comment.map((data, index)=>(
+                <PostComment comment={data} key={index} />
+            ))} 
             <div className="post-comment">
               <img
                 src={user.picture}

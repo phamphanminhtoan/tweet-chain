@@ -28,7 +28,7 @@ const ProfileBanner = props => {
             <div className="col-md-9">
               <ul className="list-inline profile-menu">
                 <li>
-                  <a to="#" onClick={()=>{
+                  <a href="#" onClick={()=>{
                     props.OpenTimeline();
                   }} className={props.Open === "Timeline" ? "active": ""}>
                     TimeLine

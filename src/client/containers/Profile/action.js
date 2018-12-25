@@ -30,7 +30,6 @@ export function fetchUser(publicKey = "") {
         dispatch(getUserSuccess(data.data));
       })
       .catch(err => {
-        toastr.error(err);
         dispatch(getUserFailure(err));
       });
   };
@@ -58,10 +57,10 @@ export function fetchListPost(publicKey = "") {
       url: "/api/post/get-list/" + publicKey
     })
       .then(data => {
+        console.log(data.data);
         dispatch(getListPostSuccess(data.data));
       })
       .catch(err => {
-        toastr.info("Tweetchain", err.response.data);
         dispatch(getListPostFailure());
       });
   };
@@ -93,7 +92,6 @@ export function fetchListFollowings(publicKey = "") {
         dispatch(getListFollowingsSuccess(data.data));
       })
       .catch(err => {
-        toastr.info("Tweetchain", err.response.data);
         dispatch(getListFollowingsFailure());
       });
   };
@@ -154,7 +152,6 @@ export function fetchPayment(publicKey = "") {
           dispatch(getPaymentSuccess(data.data));
         })
         .catch(err => {
-          toastr.error(err);
           dispatch(getPaymentFailure(err));
         });
     };

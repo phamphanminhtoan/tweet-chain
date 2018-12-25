@@ -40,14 +40,32 @@ class Profile extends React.PureComponent {
   }
   openfollow = () => {
     this.setState({ Open: "Follow" });
+    const user = JSON.parse(window.localStorage.getItem("User"));
+    if (this.props.match.params.publicKey !== undefined) {
+      this.props.fetchListFollowings(this.props.match.params.publicKey);
+    }else{
+      this.props.fetchListFollowings(user.publicKey);
+    }
   };
 
   openPayment = () => {
     this.setState({ Open: "Payment" });
+    const user = JSON.parse(window.localStorage.getItem("User"));
+    if (this.props.match.params.publicKey !== undefined) {
+      this.props.fetchPayment(this.props.match.params.publicKey);
+    }else{
+      this.props.fetchPayment(user.publicKey);
+    }
   };
 
   OpenTimeline = () => {
     this.setState({ Open: "Timeline" });
+    const user = JSON.parse(window.localStorage.getItem("User"));
+    if (this.props.match.params.publicKey !== undefined) {
+      this.props.fetchListPost(this.props.match.params.publicKey);
+    }else{
+      this.props.fetchListPost(user.publicKey);
+    }
   };
 
   componentWillMount = async () => {
@@ -58,19 +76,19 @@ class Profile extends React.PureComponent {
       promise.push(
         this.props.fetchNotification(this.props.match.params.publicKey)
       );
-      promise.push(
+/*       promise.push(
         this.props.fetchListFollowings(this.props.match.params.publicKey)
-      );
-      promise.push(
+      ); */
+    /*   promise.push(
         this.props.fetchPayment(this.props.match.params.publicKey)
-      );
+      ); */
     } else {
       const user = JSON.parse(window.localStorage.getItem("User"));
       promise.push(this.props.fetchUser(user.publicKey));
       promise.push(this.props.fetchListPost(user.publicKey));
       promise.push(this.props.fetchNotification(user.publicKey));
-      promise.push(this.props.fetchListFollowings(user.publicKey));
-      promise.push(this.props.fetchPayment(user.publicKey));
+/*       promise.push(this.props.fetchListFollowings(user.publicKey));
+      promise.push(this.props.fetchPayment(user.publicKey)); */
     }
     await Promise.all(promise);
   };
@@ -84,13 +102,6 @@ class Profile extends React.PureComponent {
     } else {
       ownerFlag = true;
     }
-    if (
-      notification.isFetching ||
-      post.isFetching ||
-      userProfile.isFetching ||
-      followings.isFetching
-    )
-      toastr.info("TweetChain", "Loading");
     return (
       <div className="timeline">
         <TimelineCover
@@ -110,34 +121,34 @@ class Profile extends React.PureComponent {
               {this.state.Open === "Timeline" ? (
                 <Fragment>
                   {ownerUser.publicKey === userProfile.user.publicKey ? (
-                    <PostBox user={userProfile} />
+                    <PostBox  />
                   ) : (
                     <div />
                   )}
-                  {!post.error ? (
+                  {!post.isFetching ? ( !post.error ?  (
                     post.listPost.map((e, index) => (
                       <PostContent
                         user={userProfile.user}
                         post={e}
                         key={index}
                       />
-                    ))
+                    ))): <p>Không có bài viết nào.</p>
                   ) : (
-                    <p>Empty.</p>
+                    <center><div className="loader"></div></center>
                   )}
                 </Fragment>
               ) : (
                 <div />
               )}
-              {this.state.Open === "Follow" ? (
-                <FollowingsComponent
-                  followings={this.props.followings.listFollowings}
-                />
-              ) : (
+              {this.state.Open === "Follow" ? 
+                (<FollowingsComponent
+                  followings={this.props.followings}
+                />) 
+               : (
                 <div />
               )}
               {this.state.Open === "Payment" ? (
-                <PaymentComponent payment={this.props.payment.listPayment} />
+                <PaymentComponent payment={this.props.payment} />
               ) : (
                 <div />
               )}
@@ -145,18 +156,20 @@ class Profile extends React.PureComponent {
             <div className="col-md-2 static">
               <div id="sticky-sidebar">
                 <h4 className="grey">Activity</h4>
-                {!notification.error ? (
+                {!notification.isFetching ? (!notification.error ? (
                   notification.listNotification.map((activities, index) => (
                     <Activities activities={activities} key={index} />
                   ))
-                ) : (
-                  <p>Empty.</p>
+                ): <p>Không có thông báo nào.</p>) : (
+                  <div className="loader"></div>
                 )}
               </div>
             </div>
           </div>
         </div>
+        
       </div>
+      
     );
   }
 }
