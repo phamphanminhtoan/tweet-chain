@@ -1,5 +1,5 @@
 let { RpcClient } = require("tendermint");
-let client = RpcClient("wss://komodo.forest.network:443");
+let client = RpcClient("wss://dragonfly.forest.network:443");
 const axios = require("axios");
 var _ = require("lodash");
 var moment = require("moment");
@@ -23,7 +23,8 @@ let serverBlockUrl = [
   "https://gorilla.forest.network/",
   "https://fox.forest.network/"
 ];
-let current = 10316;
+let current = 22624;
+let idSystem = "jdAlArNbSb";
 exports.SyncDatabase = async (req, res) => {
   const params = req.body ? req.body : req.query;
   //Loop from #1 to #lastest Block
@@ -37,18 +38,17 @@ exports.SyncDatabase = async (req, res) => {
     const Notification = Parse.Object.extend("Notification");
     const Interact = Parse.Object.extend("Interact");
     const querySystem = new Parse.Query(System);
-    querySystem.equalTo("objectId", "1C1Jap5GaI");
+    querySystem.equalTo("objectId", idSystem);
     await querySystem.first().then(async system => {
       //Loop from #1 block to #lastest Block
       console.log("run");
       systemJSON = system.toJSON();
       console.log(systemJSON.currentBlock);
       console.log(systemJSON.lastestBlock);
-      if(!systemJSON.isRunning)
+       if(!systemJSON.isRunning)
       {
-      await http.get('https://tweet-update-system.glitch.me/toggle/');
+      await http.get('https://tweet-update-system.glitch.me/toggle'); 
       for (let i = systemJSON.currentBlock+1; i <= systemJSON.lastestBlock; i++) {
-        current = i;
         let contentNotif = "This is Block " + i;
         await client
           .block({ height: i })
@@ -88,7 +88,11 @@ exports.SyncDatabase = async (req, res) => {
                     owner.set("sequence", blockData.sequence);
                     owner.set("lastTransaction", new Date(timeBlock));
                     console.log("update Sequence");
-                    promise.push(owner);
+                    await owner.save().then(()=>{
+                      console.log('done update sequence');
+                    }).catch(err=>{
+                      console.log(err);
+                    });
                   });
                   //End update Sequence
                   if (blockData.operation === "create_account") {
@@ -250,7 +254,7 @@ exports.SyncDatabase = async (req, res) => {
                       newInteract.set("block", i);
                       newInteract.set("object", blockData.params.object);
                       newInteract.set("hashCode", hashCode);
-                      newInteract.set("createTime", timeBlock);
+                      newInteract.set("createTime", new Date(timeBlock));
                       newInteract.set("type", blockData.params.content.type);
                       if (blockData.params.content.type === 1) {
                         newInteract.set("text", blockData.params.content.text);
@@ -267,7 +271,7 @@ exports.SyncDatabase = async (req, res) => {
                       queryUsers.equalTo("publicKey", blockData.account);
                       await queryUsers
                         .first()
-                        .then(user => {
+                        .then(user => { 
                           const ownerPointer = new Users();
                           ownerPointer.id = user.id;
                           newInteract.set("user", ownerPointer);
@@ -308,6 +312,7 @@ exports.SyncDatabase = async (req, res) => {
                 }
                 await Parse.Object.saveAll(promise, { useMasterKey: true })
                   .then(() => {
+                    current = i;
                     console.log("Save All done");
                     console.log("----------------");
                   })
@@ -323,16 +328,17 @@ exports.SyncDatabase = async (req, res) => {
             throw new Error(err.message);
           });
         //Update Current Block
-        await http.get('https://tweet-update-system.glitch.me/update/'+ i);
+         await http.get('https://tweet-update-system.glitch.me/update/'+ i);
         if(i === systemJSON.lastestBlock)
         {
-          await http.get('https://tweet-update-system.glitch.me/toggle/');
-        }
+          await http.get('https://tweet-update-system.glitch.me/toggle');
+        } 
       } //end Loop container
-    }
+     } 
     });
   } catch (error) {
     console.log(error);
+    console.log(current);
   }
 };
 
@@ -398,7 +404,7 @@ exports.getLastestBlock = async (req, res) => {
   try {
     const System = Parse.Object.extend("System");
     const querySystem = new Parse.Query(System);
-    querySystem.equalTo("objectId", "1C1Jap5GaI");
+    querySystem.equalTo("objectId", idSystem);
     res.send("running .. .. ..");
     client.subscribe(
       {
