@@ -8,7 +8,10 @@ function encodePostTransaction(publicKey, privateKey, content, sequence) {
         operation: "post",
         params: {
             keys: [],
-            content: content,
+            content: {
+                type: 1,
+                text: content
+            },
         },
         account: publicKey,
         sequence,

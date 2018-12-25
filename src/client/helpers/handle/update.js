@@ -7,7 +7,7 @@ function encodeUpdateNameTransaction(publicKey, privateKey, name, sequence) {
         version: 1,
         operation: "update_account",
         params: {
-            keys: "name",
+            key: "name",
             value: Buffer.from(name, 'utf-8')
         },
         account: publicKey,
@@ -26,7 +26,7 @@ function encodeUpdatePictureTransaction(publicKey, privateKey, picturePath, sequ
             version: 1,
             operation: "update_account",
             params: {
-                keys: "picture",
+                key: "picture",
                 value: fs.readFileSync(picturePath)
             },
             account: publicKey,
