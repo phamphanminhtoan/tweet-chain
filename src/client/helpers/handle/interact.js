@@ -2,13 +2,16 @@ const v1 = require('./../lib/tx/v1');
 const hdlTransaction = require('./../lib/tx/index');
 const fs = require('fs');
 
-function encodeUpdateNameTransaction(publicKey, privateKey, name, sequence) {
+function encodeCommentTransaction(publicKey, privateKey, object, content, sequence) {
     const tx = {
         version: 1,
-        operation: "update_account",
+        operation: "interact",
         params: {
-            key: "name",
-            value: Buffer.from(name, 'utf-8')
+            object,
+            content: {
+                type: 1,
+                text: content
+            }
         },
         account: publicKey,
         sequence,
@@ -20,13 +23,16 @@ function encodeUpdateNameTransaction(publicKey, privateKey, name, sequence) {
 
 }
 
-function encodeUpdatePictureTransaction(publicKey, privateKey, picturePath, sequence) {
+function encodeInteractTransaction(publicKey, privateKey, object, reactValue, sequence) {
     const tx = {
         version: 1,
-        operation: "update_account",
+        operation: "interact",
         params: {
-            key: "picture",
-            value: fs.readFileSync(picturePath)
+            object,
+            content: {
+                type: 2,
+                reaction: reactValue
+            }
         },
         account: publicKey,
         sequence,
@@ -35,10 +41,9 @@ function encodeUpdatePictureTransaction(publicKey, privateKey, picturePath, sequ
     hdlTransaction.sign(tx, privateKey);
     const txEncode = "0x" + hdlTransaction.encode(tx).toString('hex');
     return txEncode;
-
 }
 
 module.exports = {
-    encodeUpdateNameTransaction,
-    encodeUpdatePictureTransaction
+    encodeCommentTransaction,
+    encodeInteractTransaction
 }
