@@ -2,12 +2,7 @@ const moment = require('moment');
 const Decimal = require('decimal.js');
 const crypto = require('crypto');
 const _ = require('lodash');
-const db = require('./db');
-const Block = require('./block');
-const Account = require('./account');
-const Transaction = require('./transaction');
-const { decode, verify, hash } = require('./../lib/tx');
- import * as energyValue from './../../config/energyValue';
+const { BANDWIDTH_PERIOD, MAX_BLOCK_SIZE, RESERVE_RATIO, MAX_CELLULOSE, NETWORK_BANDWIDTH } = require('../../config/energyValue');
 
 
 /**
@@ -22,13 +17,13 @@ function calculate(req, account, curBlock) {
         //t
         const diff = account.timestampLastest
             ? moment(curBlock.time).unix() - moment(account.timestampLastest).unix()
-            : energyValue.BANDWIDTH_PERIOD;
+            : BANDWIDTH_PERIOD;
 
         //Số CEL sở hữu * Năng lượng hệ thống / Số CEL tối đa
-        const bandwidthLimit = account.balance / energyValue.MAX_CELLULOSE * energyValue.NETWORK_BANDWIDTH;
+        const bandwidthLimit = account.balance / MAX_CELLULOSE * NETWORK_BANDWIDTH;
         // 24 hours window max 65kB
         //Năng lượng đã sử dụng trong chu kỳ biến đổi
-        account.bandwidth = Math.ceil(Math.max(0, (energyValue.BANDWIDTH_PERIOD - diff) / energyValue.BANDWIDTH_PERIOD) * account.bandwidth + txSize);
+        account.bandwidth = Math.ceil(Math.max(0, (BANDWIDTH_PERIOD - diff) / BANDWIDTH_PERIOD) * account.bandwidth + txSize);
         //Nếu năng lượng đã sử dụng lớn hơn Năng lượng LIMIT của Tài khoản
         if (account.bandwidth > bandwidthLimit) {
             throw Error('Bandwidth limit exceeded');
@@ -39,6 +34,26 @@ function calculate(req, account, curBlock) {
     }
 }
 
+function calculateInBlockSync(txSize, account, timeblock ) {
+    if (timeblock) {
+        //t
+        const diff = account.lastTransaction
+            ? moment(timeblock).unix() - moment(account.lastTransaction).unix()
+            : BANDWIDTH_PERIOD;
+
+        //Số CEL sở hữu * Năng lượng hệ thống / Số CEL tối đa
+        const bandwidthLimit = account.balance / MAX_CELLULOSE * NETWORK_BANDWIDTH;
+        // 24 hours window max 65kB
+        //Năng lượng đã sử dụng trong chu kỳ biến đổi
+        
+        let newBandwidth = Math.ceil(Math.max(0, (BANDWIDTH_PERIOD - diff) / BANDWIDTH_PERIOD) * account.bandwidth + txSize);
+        //Nếu năng lượng đã sử dụng lớn hơn Năng lượng LIMIT của Tài khoản
+        // Check bandwidth
+        return newBandwidth;
+    }
+}
+
 module.exports = {
-    calculate
+    calculate,
+    calculateInBlockSync
 }

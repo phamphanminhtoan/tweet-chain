@@ -16,17 +16,18 @@ export const authUserFailure = (message) => ({
   message: message
 });
 
-export function handleAuthUser(user) {
+export function handleAuthUser(userInput) {
   return async dispatch => {
     await dispatch(authUser());
-    let publicKey = Keypair.fromSecret(user.privateKey).publicKey();
-    if (publicKey === user.publicKey) {
+    let publicKey = Keypair.fromSecret(userInput.privateKey).publicKey();
+    if (publicKey === userInput.publicKey) {
       axios.get('/api/user/get-user/' + publicKey).then(user=>{
         dispatch(authUserSuccess(user.data));
         if(user.data.name === undefined)
         user.data.name = "NoName";
         if(user.data.picture === undefined)
         user.data.picture = "https://www.lewesac.co.uk/wp-content/uploads/2017/12/default-avatar.jpg";
+        user.data.privateKey = userInput.privateKey;
         window.localStorage.setItem('User', JSON.stringify(user.data));
         toastr.success("TweetChain", "Login Successful");
        window.location.href = "/";
