@@ -43,10 +43,13 @@ function encodeUpdatePictureTransaction(publicKey, privateKey, picturePath, sequ
     return txEncode;
 }
 
-function encodeUpdateFollowingsTransaction(publicKey, privateKey, address, sequence) {
+function encodeUpdateFollowingsTransaction(publicKey, privateKey, addresses, sequence) {
     var following = {
-        addresses: [base32.decode(address)]
+        addresses: []
     }
+    addresses.forEach(element => {
+        following.addresses.push(base32.decode(element))
+    });
     var followParams = Buffer.from(Followings.encode(following));
     const tx = {
         version: 1,
