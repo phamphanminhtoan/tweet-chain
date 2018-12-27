@@ -4,7 +4,11 @@ const hdlTransaction = require('./../lib/tx/index');
 const { Keypair } = require('stellar-base');
 const { createHash } = require('crypto')
 
-const key = Keypair.random();
+let key = Keypair.random();
+
+function renew(){
+    key = Keypair.random();
+}
 
 function createPublicKey() {
     return key.publicKey();
@@ -41,5 +45,6 @@ function encodeCreateAccountTransaction(publicKey, privateKey, address, sequence
 module.exports = {
     createPublicKey,
     createSecretKey,
-    encodeCreateAccountTransaction
+    encodeCreateAccountTransaction,
+    renew
 }

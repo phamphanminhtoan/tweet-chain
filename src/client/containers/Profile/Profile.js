@@ -14,11 +14,13 @@ import {
   fetchNotification,
   fetchPayment
 } from "./action";
+import { getUpdateUser } from "../App/action";
 //Modal
 import FollowingsComponent from "../../components/Followings";
 import PaymentComponent from "../../components/Payment";
+import EditProfile from "../../components/EditProfile";
+import Explore from "../../components/Explore";
 import { toastr } from "react-redux-toastr";
-
 
 const customStyles = {
   content: {
@@ -38,12 +40,16 @@ class Profile extends React.PureComponent {
       Open: "Timeline"
     };
   }
+
+  componentDidUpdate = async () => {
+    await this.props.getUpdateUser();
+  };
   openfollow = () => {
     this.setState({ Open: "Follow" });
     const user = JSON.parse(window.localStorage.getItem("User"));
     if (this.props.match.params.publicKey !== undefined) {
       this.props.fetchListFollowings(this.props.match.params.publicKey);
-    }else{
+    } else {
       this.props.fetchListFollowings(user.publicKey);
     }
   };
@@ -53,19 +59,27 @@ class Profile extends React.PureComponent {
     const user = JSON.parse(window.localStorage.getItem("User"));
     if (this.props.match.params.publicKey !== undefined) {
       this.props.fetchPayment(this.props.match.params.publicKey);
-    }else{
+    } else {
       this.props.fetchPayment(user.publicKey);
     }
   };
 
-  OpenTimeline = () => {
+  openTimeline = () => {
     this.setState({ Open: "Timeline" });
     const user = JSON.parse(window.localStorage.getItem("User"));
     if (this.props.match.params.publicKey !== undefined) {
       this.props.fetchListPost(this.props.match.params.publicKey);
-    }else{
+    } else {
       this.props.fetchListPost(user.publicKey);
     }
+  };
+
+  openEditProfile = () => {
+    this.setState({ Open: "EditProfile" });
+  };
+
+  openExplore = () => {
+    this.setState({ Open: "Explore" });
   };
 
   componentWillMount = async () => {
@@ -76,10 +90,10 @@ class Profile extends React.PureComponent {
       promise.push(
         this.props.fetchNotification(this.props.match.params.publicKey)
       );
-/*       promise.push(
+      /*       promise.push(
         this.props.fetchListFollowings(this.props.match.params.publicKey)
       ); */
-    /*   promise.push(
+      /*   promise.push(
         this.props.fetchPayment(this.props.match.params.publicKey)
       ); */
     } else {
@@ -87,10 +101,14 @@ class Profile extends React.PureComponent {
       promise.push(this.props.fetchUser(user.publicKey));
       promise.push(this.props.fetchListPost(user.publicKey));
       promise.push(this.props.fetchNotification(user.publicKey));
-/*       promise.push(this.props.fetchListFollowings(user.publicKey));
+      /*       promise.push(this.props.fetchListFollowings(user.publicKey));
       promise.push(this.props.fetchPayment(user.publicKey)); */
     }
     await Promise.all(promise);
+  };
+
+  componentDidUpdate = async () => {
+    await this.props.getUpdateUser();
   };
 
   render() {
@@ -110,9 +128,12 @@ class Profile extends React.PureComponent {
           countFollow={followings.listFollowings.length}
           follow={this.props.followings}
           openfollow={this.openfollow}
-          OpenTimeline={this.OpenTimeline}
+          openTimeline={this.openTimeline}
           openPayment={this.openPayment}
+          openEditProfile={this.openEditProfile}
           Open={this.state.Open}
+          getUpdateUser={this.props.getUpdateUser}
+          openExplore={this.openExplore}
         />
         <div id="page-contents">
           <div className="row">
@@ -121,34 +142,60 @@ class Profile extends React.PureComponent {
               {this.state.Open === "Timeline" ? (
                 <Fragment>
                   {ownerUser.publicKey === userProfile.user.publicKey ? (
-                    <PostBox  />
+                    <PostBox
+                      getUpdateUser={this.props.getUpdateUser}
+                      fetchListPost={this.props.fetchListPost}
+                    />
                   ) : (
                     <div />
                   )}
-                  {!post.isFetching ? ( !post.error ?  (
-                    post.listPost.map((e, index) => (
-                      <PostContent
-                        user={userProfile.user}
-                        post={e}
-                        key={index}
-                      />
-                    ))): <p>Không có bài viết nào.</p>
+                  {!post.isFetching ? (
+                    !post.error ? (
+                      post.listPost.map((e, index) => (
+                        <PostContent
+                          user={userProfile.user}
+                          post={e}
+                          key={index}
+                          getUpdateUser={this.props.getUpdateUser}
+                        />
+                      ))
+                    ) : (
+                      <p>Không có bài viết nào.</p>
+                    )
                   ) : (
-                    <center><div className="loader"></div></center>
+                    <center>
+                      <div className="loader" />
+                    </center>
                   )}
                 </Fragment>
               ) : (
                 <div />
               )}
-              {this.state.Open === "Follow" ? 
-                (<FollowingsComponent
+              {this.state.Open === "Follow" ? (
+                <FollowingsComponent
                   followings={this.props.followings}
-                />) 
-               : (
+                  getUpdateUser={this.props.getUpdateUser}
+                />
+              ) : (
                 <div />
               )}
               {this.state.Open === "Payment" ? (
-                <PaymentComponent payment={this.props.payment} />
+                <PaymentComponent
+                  payment={this.props.payment}
+                  getUpdateUser={this.props.getUpdateUser}
+                />
+              ) : (
+                <div />
+              )}
+
+              {this.state.Open === "EditProfile" ? (
+                <EditProfile getUpdateUser={this.props.getUpdateUser} />
+              ) : (
+                <div />
+              )}
+
+              {this.state.Open === "Explore" ? (
+                <Explore getUpdateUser={this.props.getUpdateUser} />
               ) : (
                 <div />
               )}
@@ -156,20 +203,22 @@ class Profile extends React.PureComponent {
             <div className="col-md-2 static">
               <div id="sticky-sidebar">
                 <h4 className="grey">Activity</h4>
-                {!notification.isFetching ? (!notification.error ? (
-                  notification.listNotification.map((activities, index) => (
-                    <Activities activities={activities} key={index} />
-                  ))
-                ): <p>Không có thông báo nào.</p>) : (
-                  <div className="loader"></div>
+                {!notification.isFetching ? (
+                  !notification.error ? (
+                    notification.listNotification.map((activities, index) => (
+                      <Activities activities={activities} key={index} />
+                    ))
+                  ) : (
+                    <p>Không có thông báo nào.</p>
+                  )
+                ) : (
+                  <div className="loader" />
                 )}
               </div>
             </div>
           </div>
         </div>
-        
       </div>
-      
     );
   }
 }
@@ -187,7 +236,8 @@ const mapDispatchToProps = dispatch => ({
   fetchListFollowings: publicKey => dispatch(fetchListFollowings(publicKey)),
   fetchUser: publicKey => dispatch(fetchUser(publicKey)),
   fetchNotification: publicKey => dispatch(fetchNotification(publicKey)),
-  fetchPayment: publicKey => dispatch(fetchPayment(publicKey))
+  fetchPayment: publicKey => dispatch(fetchPayment(publicKey)),
+  getUpdateUser: () => dispatch(getUpdateUser())
 });
 
 export default withRouter(

@@ -30,6 +30,25 @@ exports.getInteract = async (req, res) => {
         result.comment = interact[0];
         if(interact[1].length > 0)
         result.reaction = interact[1];
+
+/*         Interacts[1].forEach(interact => {
+          let postId = interact.get('object').id;
+          interact = interact.set('user', interact.get('user').toJSON());
+          interact = interact.toJSON();
+          if (!reactions[postId]) {
+              reactions[postId] = [];
+          }
+          if (!addedUser[postId]) {
+              addedUser[postId] = [];
+          }
+
+          if (!addedUser[postId].includes(interact.user.ObjectId)) {
+              reactions[postId].push(interact);
+              addedUser[postId].push(interact.user.ObjectId);
+              if (!myReaction[postId] && request.user && interact.user.ObjectId == request.user.id)
+              myReaction[postId] = interact.reaction;
+          }
+      }); */
         res.send(result);
     }).catch(err=>{
         throw new Error(err.message);

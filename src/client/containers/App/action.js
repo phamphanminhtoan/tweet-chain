@@ -27,8 +27,8 @@ export function handleAuthUser(userInput) {
         user.data.name = "NoName";
         if(user.data.picture === undefined)
         user.data.picture = "https://www.lewesac.co.uk/wp-content/uploads/2017/12/default-avatar.jpg";
-        user.data.privateKey = userInput.privateKey;
         window.localStorage.setItem('User', JSON.stringify(user.data));
+        window.localStorage.setItem('PrivateKey', userInput.privateKey);
         toastr.success("TweetChain", "Login Successful");
        window.location.href = "/";
       }).catch(err=>{
@@ -36,5 +36,18 @@ export function handleAuthUser(userInput) {
       });
     }
     else dispatch(authUserFailure());
+  };
+}
+
+export function getUpdateUser() {
+  return async dispatch => {
+    const currentUser = JSON.parse(window.localStorage.getItem('User'));
+    await axios.get('/api/user/get-user/' + currentUser.publicKey).then((user)=>{
+      window.localStorage.setItem('User', JSON.stringify(user.data));
+    }).catch(err=>{
+      toastr.error("Tweetchain", "Lỗi");
+      console.log(err);
+    });
+
   };
 }

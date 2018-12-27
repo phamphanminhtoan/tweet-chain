@@ -4,7 +4,6 @@ const router = express.Router();
 const { test, test1 } = require("../controllers/test");
 const {
   SyncDatabase,
-  SyncDatabaseLocal,
   getAndUpdateUser,
   decode,
   getLastestBlock
@@ -21,7 +20,7 @@ router.route("/test").get(test);
 router.route("/test1").get(test1);
 
 //Block
-router.route("/block/sync").get(SyncDatabaseLocal);
+router.route("/block/sync").get(SyncDatabase);
 
 router.route("/block/decode").post(decode);
 

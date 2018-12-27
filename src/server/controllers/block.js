@@ -13,7 +13,7 @@ const {
   decodeForExcept
 } = require("../../client/helpers/lib/tx/index");
 const { decodeFollow, decodePost } = require("../../client/helpers/lib/tx/v1");
-const { calculate, calculateInBlockSync } = require("../../client/helpers/energy/calculate");
+const { calculate, calculateInBlockSync, calculateEnergy } = require("../../client/helpers/energy/calculate");
 const base32 = require("base32.js");
 
 let serverBlockUrl = [
@@ -23,8 +23,8 @@ let serverBlockUrl = [
   "https://gorilla.forest.network/",
   "https://fox.forest.network/"
 ];
-let current = 22624;
-let idSystem = "jdAlArNbSb";
+let newblock = 0;
+let idSystem = "1C1Jap5GaI";
 exports.SyncDatabase = async (req, res) => {
   const params = req.body ? req.body : req.query;
   //Loop from #1 to #lastest Block
@@ -342,12 +342,10 @@ exports.SyncDatabase = async (req, res) => {
     console.log(current);
   }
 };
-
-exports.SyncDatabaseLocal = async (req, res) => {
-  const params = req.body ? req.body : req.query;
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+async function SyncDatabaseLocal () {
   //Loop from #1 to #lastest Block
   try {
-    res.send("Running .. .. .. ");
     //Define ParseObject
     const Users = Parse.Object.extend("Users");
     const System = Parse.Object.extend("System");
@@ -363,7 +361,22 @@ exports.SyncDatabaseLocal = async (req, res) => {
       systemJSON = system.toJSON();
       console.log(systemJSON.currentBlock);
       console.log(systemJSON.lastestBlock);
-      for (let i = 27309; i <= 27527; i++) {
+      if(!systemJSON.isRunning)
+      {
+        const lastBlock = newblock;
+        const IsRunningsystem = new Parse.Query(System);
+        IsRunningsystem.equalTo('objectId', idSystem);
+        await IsRunningsystem.first().then(async update=>{
+          update.set('isRunning', true);
+          await update.save().then(()=>{
+            console.log('Update done'); 
+          }).catch(err=>{
+            console.log(err);
+          });
+        }).catch(err=>{
+          console.log(err);
+        });
+      for (let i = systemJSON.currentBlock+1; i <= lastBlock; i++) {
         let contentNotif = "This is Block " + i;
         await client
           .block({ height: i })
@@ -379,7 +392,6 @@ exports.SyncDatabaseLocal = async (req, res) => {
                 let errorPost = false;
                 try {
                   blockData = decode(Buffer.from(txs[j], "base64"));
-                  let txSize = Buffer.from(txs[j], "base64").length;
                 } catch (err) {
                   console.log("Error Decode");
                   contentNotif = contentNotif + ". Error Decode";
@@ -402,12 +414,10 @@ exports.SyncDatabaseLocal = async (req, res) => {
                   sequenceUser.equalTo("publicKey", blockData.account);
                   await sequenceUser.first().then(async owner => {
                     owner.set("sequence", blockData.sequence);
-                    owner.set("lastTransaction", new Date(timeBlock));
+                    owner.set("bandwidthTime", new Date(timeBlock));
                     let userJSON = owner.toJSON();
                     let txsSize = Buffer.from(txs[j], 'base64').length;
                     let bandwidth = calculateInBlockSync(txsSize ,userJSON, timeBlock);
-                    console.log(txsSize);
-                    console.log(bandwidth);
                     owner.set("txsSize",parseInt(txsSize));
                     owner.set("bandwidth", parseInt(bandwidth)); 
                     console.log("update Sequence");
@@ -425,6 +435,7 @@ exports.SyncDatabaseLocal = async (req, res) => {
                     newUsers.set("balance", 0);
                     newUsers.set("sequence", 0);
                     newUsers.set("block", i);
+                    newUsers.set("bandwidth", 0);
                     newUsers.set("createTime", new Date(timeBlock));
                     //Save New user
                     promise.push(newUsers);
@@ -639,6 +650,7 @@ exports.SyncDatabaseLocal = async (req, res) => {
                     current = i;
                     console.log("Save All done");
                     console.log("----------------");
+
                   })
                   .catch(err => {
                     console.log(err);
@@ -651,7 +663,37 @@ exports.SyncDatabaseLocal = async (req, res) => {
             console.log(err);
             throw new Error(err.message);
           });
+          if(i !== lastBlock)
+          {
+          const system = new Parse.Query(System);
+          system.equalTo('objectId', idSystem);
+          await system.first().then(async update=>{
+            update.set('currentBlock', i);
+            await update.save().then(()=>{
+              console.log('Update done'); 
+            }).catch(err=>{
+              console.log(err);
+            });
+          }).catch(err=>{
+            console.log(err);
+          });
+        }else{
+          const system = new Parse.Query(System);
+          system.equalTo('objectId', idSystem);
+          await system.first().then(async update=>{
+            update.set('currentBlock', i);
+            update.set('isRunning',false);
+            await update.save().then(()=>{
+              console.log('Update final'); 
+            }).catch(err=>{
+              console.log(err);
+            });
+          }).catch(err=>{
+            console.log(err);
+          });
+        }
       } //end Loop container
+    }
     });
   } catch (error) {
     console.log(error);
@@ -732,15 +774,9 @@ exports.getLastestBlock = async (req, res) => {
       },
       async result => {
         if (result) {
-          await querySystem.first().then(async system => {
-            system.set("lastestBlock", parseInt(result.block.header.height));
-            await system
-              .save()
-              .then(system => {})
-              .catch(err => {
-                throw new Error(err);
-              });
-          });
+          console.log(newblock);
+          newblock = parseInt(result.block.header.height);
+          SyncDatabaseLocal();
         }
       }
     );

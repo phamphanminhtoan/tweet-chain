@@ -34,6 +34,35 @@ exports.getUser = async (req, res) => {
   }
 };
 
+exports.explorer = async (req, res) => {
+  const params = req.body ? req.body : req.query;
+  try {
+    const User = Parse.Object.extend("Users");
+    const queryUser = new Parse.Query(User);
+    queryUser.equalTo("publicKey", req.params.publicKey);
+    queryUser.first().then(
+      user => {
+        let userJSON = user.toJSON();
+          if(!user)
+        throw new Error("User is not defined");
+        if(userJSON.followings.length !== 0 && userJSON.followings !== undefined)
+        {
+            userJSON.followings.forEach(element =>{
+              element
+            });
+        }
+      },
+      error => {
+          throw new Error(error);
+      }
+    );
+  } catch (error) {
+    res.send(error);
+  }
+};
+
+
+
 
  exports.fetchUser = async (req, res) => {
   const params = req.body ? req.body : req.query;

@@ -12,21 +12,24 @@ class Postbox extends React.Component {
   }
 
   handleSubmit = async () =>{
-    console.log('hahaha');
+     const privateKey = window.localStorage.getItem("PrivateKey");
     const user = JSON.parse(window.localStorage.getItem("User"));
-    console.log(user);
-    let finalCode = encodePostTransaction(user.publicKey, user.privateKey, this.state.postContent, parseInt(user.sequence+1));
+    let finalCode = encodePostTransaction(user.publicKey, privateKey, this.state.postContent, user.sequence+1);
     console.log(finalCode);
     console.log(this.state.postContent);
     await axios.get('https://komodo.forest.network/broadcast_tx_commit?tx=' + finalCode)
     .then(response => {
       console.log(response);
-      toastr.success("Tweetchain", response.data.error.message);
+      if( response.data.result.check_tx.code === 1 )
+      toastr.error("Tweetchain", response.data.result.check_tx.log);
+      else
+      toastr.success("Tweetchain", "Success");
     })
     .catch(error => {
       toastr.error("Tweetchain", error.message);
       console.log(error);
-    }); 
+    });  
+    await this.props.getUpdateUser();
   }
 
   handleChange = (e) => {

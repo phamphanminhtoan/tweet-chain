@@ -39,6 +39,9 @@ module.exports = {
       '/api': 'http://localhost:8080'
     }
   },
+  node: {
+    fs: 'empty'
+  },
   plugins: [
     new CleanWebpackPlugin(['public/bundle.js']),
   ]

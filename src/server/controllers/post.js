@@ -55,7 +55,7 @@ exports.getListPost = async (req, res) => {
               let pos = 0;
               let final = result.map(post=>{
                 let postJSON = post.toJSON();
-                postJSON.comment = interact[pos];
+                postJSON.comment = interact[pos]; 
                 postJSON.reaction = interact[pos+1];
                 pos = pos + 2;
                 return postJSON;
