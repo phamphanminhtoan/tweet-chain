@@ -57,7 +57,6 @@ export function fetchListPost(publicKey = "") {
       url: "/api/post/get-list/" + publicKey
     })
       .then(data => {
-        console.log(data.data);
         dispatch(getListPostSuccess(data.data));
       })
       .catch(err => {
@@ -88,7 +87,6 @@ export function fetchListFollowings(publicKey = "") {
       url: "/api/followings/get-list/" + publicKey
     })
       .then(data => {
-        console.log(data.data);
         dispatch(getListFollowingsSuccess(data.data));
       })
       .catch(err => {

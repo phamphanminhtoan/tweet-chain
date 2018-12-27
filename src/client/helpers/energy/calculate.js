@@ -42,18 +42,43 @@ function calculateInBlockSync(txSize, account, timeblock ) {
             : BANDWIDTH_PERIOD;
 
         //Số CEL sở hữu * Năng lượng hệ thống / Số CEL tối đa
-        const bandwidthLimit = account.balance / MAX_CELLULOSE * NETWORK_BANDWIDTH;
+        const bandwidthLimit = parseInt(account.balance) / MAX_CELLULOSE * NETWORK_BANDWIDTH;
         // 24 hours window max 65kB
         //Năng lượng đã sử dụng trong chu kỳ biến đổi
         
-        let newBandwidth = Math.ceil(Math.max(0, (BANDWIDTH_PERIOD - diff) / BANDWIDTH_PERIOD) * account.bandwidth + txSize);
+        let newBandwidth = Math.ceil(Math.max(0, (BANDWIDTH_PERIOD - diff) / BANDWIDTH_PERIOD) * parseInt(account.bandwidth) + parseInt(txSize));
         //Nếu năng lượng đã sử dụng lớn hơn Năng lượng LIMIT của Tài khoản
         // Check bandwidth
         return newBandwidth;
     }
 }
 
+function calculateEnergy(account ) {
+    console.log('vo');
+        //t
+        let now = moment();
+        let duration = moment.duration(now.diff(account.bandwidthTime));
+        let diff = duration.asSeconds();
+        console.log(diff);
+
+        //Số CEL sở hữu * Năng lượng hệ thống / Số CEL tối đa
+        const bandwidthLimit = parseInt(account.balance) / MAX_CELLULOSE * NETWORK_BANDWIDTH;
+        // 24 hours window max 65kB
+        //Năng lượng đã sử dụng trong chu kỳ biến đổi
+        console.log(bandwidthLimit);
+        let used = Math.ceil(Math.max(0, (BANDWIDTH_PERIOD - diff) / BANDWIDTH_PERIOD) * parseInt(account.bandwidth))
+        console.log(used);
+       
+        //Nếu năng lượng đã sử dụng lớn hơn Năng lượng LIMIT của Tài khoản
+        // Check bandwidth
+        return parseInt(bandwidthLimit - used);
+
+}
+
+
+
 module.exports = {
     calculate,
-    calculateInBlockSync
+    calculateInBlockSync,
+    calculateEnergy
 }

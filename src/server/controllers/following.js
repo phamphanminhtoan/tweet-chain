@@ -13,24 +13,22 @@ exports.getListFollow = async (req, res) => {
       .first()
       .then(async result => {
         if (!result) throw new Error("User is undefined");
-
+        let finalResult = [];
         let promise = [];
         let userJSON = result.toJSON();
         if (userJSON.followings !== undefined) {
           let followings = result.toJSON().followings;
-          followings.forEach(element => {
+          
+          followings.forEach(async (element, index) => {
             const queryUserFollow = new Parse.Query(User);
-            queryUser.equalTo("publicKey", element);
-            promise.push(queryUser.first());
-          });
+            queryUserFollow.equalTo("publicKey", element.toString());
+            await queryUserFollow.first().then((user)=>{
 
-          await Promise.all(promise)
-            .then(follows => {
-              res.send(follows);
-            })
-            .catch(err => {
-              throw new Error(err.message);
+              finalResult.push(user.toJSON());
+              if(index === (followings.length)-1)
+              res.send(finalResult);
             });
+          });
         } else
         {
           throw new Error("No Followings");
