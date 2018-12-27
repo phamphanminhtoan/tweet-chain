@@ -23,7 +23,6 @@ function createSecretKey() {
 //   .toUpperCase());
 
 function encodeCreateAccountTransaction(publicKey, privateKey, address, sequence) {
-    return new Promise((resolve, reject) => { 
     const tx = {
         version: 1,
         operation: "create_account",
@@ -36,12 +35,7 @@ function encodeCreateAccountTransaction(publicKey, privateKey, address, sequence
     }
     hdlTransaction.sign(tx, privateKey);
     const txEncode = "0x" + hdlTransaction.encode(tx).toString('hex');
-    resolve( txEncode);
-    }
-    )
-        .catch(error => {
-            console.log(error);
-        });
+    return  txEncode;
 }
 
 module.exports = {
